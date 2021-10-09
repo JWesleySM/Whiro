@@ -1,13 +1,25 @@
 # Introduction
 
-The internal state is formed by the values that a program manipulates. Said values are stored in different memory regions: stack, heap and static memory. The goal of this project is to report said state at different points during the execution of a program. To do so, we The ability to inspect the program state is useful for several reasons such as debugging, program verification, and data visualization.  
+The internal state is formed by the values that a program manipulates. Said values are stored in different memory regions: stack, heap and static memory. The goal of this project is to report said state at different points during the execution of a program. To do so, we The ability to inspect the program state is useful for several reasons such as debugging, program verification, and data visualization.  Identifying program state is difficult in type-unsafe languages. These languages such as C. C has a weak type system that neither associates size information with memory regions, nor distinguishes pointers from scalars. Besides that, it is possible to create new pointers by applying arithmetic operations on existing pointers or by casting from integers This implies that no memory fragment can be safely released since it could still be accessed by ambiguous program elements. The goal of this project is to track the program state in programs written in C.
 
 # Whiro
-Whiro is a framework that inserts in a program the code necessary to report its internal state.
-Whiro has two main components:
+Whiro is a framework that inserts in a program the code necessary to report its internal state. To do so, Whiro uses a data structure called _Memory Monitor_. Such data strucuture consists of the following elements:
 
-- An LLVM pass that implements the static components of the Memory Monitor and it is responsible to instrument the program
-- A library written in C that implements the dynamic components of the Memory Monitor
+* **S (Stack Map)**
+* **G (Global Map)** 
+* **H (Heap Table)**
+* **T (Type Table)**
+
+**G** maps global variables to debugging information. **S** is analogous, except that it maps automatic variables to debugging information. There exists one map **S** per program function—each table stores information related to variables in the scope of a function. **H** is the set of addresses of memory blocks allocated in the heap. **T** holds metadata describing every type in the target program. **G** and **S** are the _static_ elements of the monitor. They exist ony during the instrumentation of a program. **H** and **T** are the _dynamic_ components of the monitor. They exist during the execution of the program and form the so-called _Auxiliary State_. **T** is constructed statically and it is read at runtime. 
+
+The program state is reported at _Inspection Points_. Inspection points are routines that are inserted in the program at different points. In each one of these routines, the values of the visible variables at the correspoding program point are reported. In principle, every program point where new instructions can be placed can be inspected, but in the currently implementation, Whiro create inspection points right before the return point of funtions. The variables are reported with a calling context formed by the name of the function and a call counter, i.e., a value that corresponds to the n-th call to that function. 
+
+This repository contains the two main components of the Whiro framework:
+
+- An LLVM pass that implements the static components of the Memory Monitor and it is responsible to instrument the program. It tracks variables, heap operations, and constructs the type table **T**
+- A library written in C that implements the dynamic components of the Memory Monitor. It must be linked agains the instrumented program
+
+The state of the program is reported in an output file. Every instrumented program _P_ will produce a file _P__Output_, containing state snapshots at different inspection points.
 
 # Whiro Workflow
 
@@ -92,7 +104,7 @@ $LLVM_BIN/clang program.s -o program.out
 The _program.out_ file is the program with the code to report its internal state. Notice that, this program will read the type table file. Make sure it is able to do it. The [runWhiro.sh](https://github.com/JWesleySM/NewWhiro/blob/main/Benchmarks/runWhiro.sh) script is a good reference to this workflow.
 
 # Customizations
-Whiro allows different options to customize the amount of program state that is tracked. The user can configure the granularity of inspection points, to encompass, for instance, either the return statement of every function, or the last statement of the program that is visible to the compiler. Similarly, state can be configured to include values stored in global, stack-allocated and heap-allocated variables, or any combination of them. Those options are used in the instrumentation pass. The options are the following:
+Whiro allows different options to customize the amount of program state that is tracked. The user can configure the granularity of inspection points, to encompass, for instance, either the return statement of every function, or the last statement of the program that is visible to the compiler (the return of function _main_). Similarly, state can be configured to include values stored in global, stack-allocated and heap-allocated variables, or any combination of them. Those options are used in the instrumentation pass. The options are the following:
 
 * **-om** : inspect the state of the program only at the _main_ function
 * **-pr**: track the contents pointed by pointers
