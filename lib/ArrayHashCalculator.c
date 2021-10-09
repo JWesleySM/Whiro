@@ -1,14 +1,14 @@
 #include "../include/Whiro.h"
 
 char* WhiroGetArrayIndexAsString(int Index){
-	int QuantDigits = 0, Num = Index;
-	while(Num !=0){
-		QuantDigits++;
-		Num /= 10;
-	}
-	char IndexString[QuantDigits + 3];
-	snprintf(IndexString, QuantDigits + 3, "[%d]", Index);
-	return IndexString;
+  int QuantDigits = 0, Num = Index;
+  while(Num !=0){
+    QuantDigits++;
+    Num /= 10;
+  }
+  char IndexString[QuantDigits + 3];
+  snprintf(IndexString, QuantDigits + 3, "[%d]", Index);
+  return IndexString;
 }
 
 int WhiroComputeHashcode1D(void* Array, int Size, int Format){
