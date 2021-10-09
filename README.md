@@ -1,23 +1,23 @@
 # Introduction
 
-The internal state is formed by the values that a program manipulates. Said values are stored in different memory regions: stack, heap and static memory. The goal of this project is to report said state at different points during the execution of a program. To do so, we The ability to inspect the program state is useful for several reasons such as debugging, program verification, and data visualization.  Identifying program state is difficult in type-unsafe languages. These languages such as C. C has a weak type system that neither associates size information with memory regions, nor distinguishes pointers from scalars. Besides that, it is possible to create new pointers by applying arithmetic operations on existing pointers or by casting from integers This implies that no memory fragment can be safely released since it could still be accessed by ambiguous program elements. The goal of this project is to track the program state in programs written in C and report said state in a human-observable form.
+The internal state is formed by the values that a program manipulates. Said values are stored in different memory regions: stack, heap, and static memory. The goal of this project is to report said state at different points during the execution of a program. The ability to inspect the program state is useful for several reasons such as debugging, program verification, and data visualization.  Identifying program state is difficult in type-unsafe languages. These languages such as C. C has a weak type system that neither associates size information with memory regions, nor distinguishes pointers from scalars. Besides that, it is possible to create new pointers by applying arithmetic operations on existing pointers or by casting from integers This implies that no memory fragment can be safely released since it could still be accessed by ambiguous program elements. The goal of this project is to track the program state in programs written in C and report said state in a human-observable form.
 
 # Whiro
-Whiro is a framework that inserts in a program the code necessary to report its internal state. To do so, Whiro uses a data structure called _Memory Monitor_. Such data strucuture consists of the following elements:
+Whiro is a framework that inserts in a program the code necessary to report its internal state. This instrumentation is inserted in the bytecode that LLVM produces for each program. To track this state, Whiro uses a data structure called _Memory Monitor_. Such data structure consists of the following elements:
 
-* **S (Stack Map)**
-* **G (Global Map)** 
-* **H (Heap Table)**
-* **T (Type Table)**
+* **Stack Maps (S)**
+* **Global Map (G)** 
+* **Heap Table (H)**
+* **Type Table (T)**
 
 **G** maps global variables to debugging information. **S** is analogous, except that it maps automatic variables to debugging information. There exists one map **S** per program function—each table stores information related to variables in the scope of a function. **H** is the set of addresses of memory blocks allocated in the heap. **T** holds metadata describing every type in the target program. **G** and **S** are the _static_ elements of the monitor. They exist ony during the instrumentation of a program. **H** and **T** are the _dynamic_ components of the monitor. They exist during the execution of the program and form the so-called _Auxiliary State_. **T** is constructed statically and it is read at runtime. 
 
-The program state is reported at _Inspection Points_. Inspection points are routines that are inserted in the program at different points. In each one of these routines, the values of the visible variables at the correspoding program point are reported. In principle, every program point where new instructions can be placed can be inspected, but in the currently implementation, Whiro create inspection points right before the return point of funtions. The variables are reported with a calling context formed by the name of the function and a call counter, i.e., a value that corresponds to the n-th call to that function. 
+The program state is reported at _Inspection Points_. Inspection points are routines that are inserted in the program at different points. In each one of these routines, the values of the visible variables at the corresponding program point are reported. In principle, every program point where new instructions can be placed can be inspected, but in the current implementation, Whiro creates inspection points right before the return point of functions. The variables are reported with a calling context formed by the name of the function and a call counter, i.e., a value that corresponds to the n-th call to that function. The monitor also changes the form of the program to report variables that are dead at inspection points. Whiro either extends the live range of variables using _Phi_ instructions or shadow them in the stack of the function being instrumented. We track how many times such changes were made and report them as statistics.
 
 This repository contains the two main components of the Whiro framework:
 
 - An LLVM pass that implements the static components of the Memory Monitor and it is responsible to instrument the program. It tracks variables, heap operations, and constructs the type table **T**
-- A library written in C that implements the dynamic components of the Memory Monitor. It must be linked agains the instrumented program
+- A library written in C that implements the dynamic components of the Memory Monitor. It must be linked against the instrumented program
 
 The state of the program is reported in an output file. Every instrumented program _P_ will produce a file _P__Output_, containing state snapshots at different inspection points.
 
@@ -56,7 +56,7 @@ Clone this repository and build the Memory Monitor as an LLVM pass. Define a cou
 $ LLVM_INSTALL_DIR=</path/to/llvm/>
 $ LLVM_BIN=$LLVM_INSTALL_DIR/bin
 ```
-For example, if you built LLVM from source the commands above, the paths will be like:
+For example, if you built LLVM from source using the commands above, the paths will be like:
 ```
 $ LLVM_INSTALL_DIR=/path/to/llvm-project/build
 $ LLVM_BIN=/path/to/llvm-project/build/bin
@@ -80,7 +80,7 @@ Instrument the program as:
 $LLVM_BIN/opt -load /build/lib/libMemoryMonitor.so -memoryMonitor (or libMemoryMonitor.dylib if you're running on macOS) program.bc -o program.wbc
 ```
 
-The _program.wbc_ file is the modified bytecode which contains the instrumentation on it. Using this bytecode, one can produce a new program that will run normally and also run the code to create the output file. However, the new program must be linked against the dynamic components of the Memory Monitor, i.e., the Auxiliary State. You can do it either statically or dinamically. To link them statically, follow the steps below:
+The _program.wbc_ file is the modified bytecode that contains the instrumentation on it. Using this bytecode, one can produce a new program that will run normally and also run the code to create the output file. However, the new program must be linked against the dynamic components of the Memory Monitor, i.e., the Auxiliary State. You can do it either statically or dynamically. To link them statically, follow the steps below:
 
 Compile the components:
 ```
@@ -104,20 +104,22 @@ $LLVM_BIN/clang program.s -o program.out
 The _program.out_ file is the program with the code to report its internal state. Notice that, this program will read the type table file. Make sure it is able to do it. The [runWhiro.sh](https://github.com/JWesleySM/NewWhiro/blob/main/Benchmarks/runWhiro.sh) script is a good reference to this workflow.
 
 # Customizations
-Whiro allows different options to customize the amount of program state that is tracked. The user can configure the granularity of inspection points, to encompass, for instance, either the return statement of every function, or the last statement of the program that is visible to the compiler (the return of function _main_). Similarly, state can be configured to include values stored in global, stack-allocated and heap-allocated variables, or any combination of them. Those options are used in the instrumentation pass. The options are the following:
+Whiro allows different options to customize the amount of program state that is tracked. The user can configure the granularity of inspection points, to encompass, for instance, either the return statement of every function or the last statement of the program that is visible to the compiler (the return of function _main_). Similarly, state can be configured to include values stored in global, stack-allocated and heap-allocated variables, or any combination of them. Those options are used in the instrumentation pass. The options are the following:
 
 * **-om** : inspect the state of the program only at the _main_ function
 * **-pr**: track the contents pointed by pointers
 * **-stc** : inspect only the static variables
 * **-stk**: inspect only the variables that reside on the stack of the functions
-* **-hp**: inspect only the variables that point to heap-allocated memory. Notice that by enabling this option, the option *trackPtr* is automatically enabled
+* **-hp**: inspect only the variables that point to heap-allocated memory. Notice that by enabling this option, the option *pr* is automatically enabled
 * **-fp**: inspect the entire heap, i.e., all the data blocks allocated in the heap
 
 A user can combine those different options. For example, the code below:
 
-``` $LLVM_BIN/opt -load /build/lib/libMemoryMonitor.so -memoryMonitor -stc -hp -om program.bc -o program.wbc ```
+``` 
+$LLVM_BIN/opt -load /build/lib/libMemoryMonitor.so -memoryMonitor -stc -hp -om program.bc -o program.wbc
+```
 
-It tells Whiro to inspect only the variables allocated in static memory and the variables that point to the heap, only at the return point of function _main_. By default, the options **-stc**, **-stk**, and **-hp** are enabled, but if a user manually chooses one of them, the others are automatically disabled.
+It tells Whiro to inspect only the variables allocated in static memory and the variables that point to the heap, only at the return point of function _main_. By default, the options **-stc**, **-stk**, and **-hp** are enabled, but if a user manually chooses one of them, the others are automatically disabled. Notice that different customizations lead to different behaviours of Whiro. For example, if a user decides not to track pointers, Whiro will not build the heap table **H**, since the heap cannot be accessed unless by using pointers. This has an impact on the performance of instrumented programs.
 
 ### Debug options
 Whiro has a debug mode. You can use it using the LLVM opt's **-debug-only** option. There are two debug modes:
@@ -127,7 +129,9 @@ Whiro has a debug mode. You can use it using the LLVM opt's **-debug-only** opti
 
 You can use them separately or together:
 
-``` $LLVM_BIN/opt -load /build/lib/libMemoryMonitor.so -memoryMonitor -debug-only=memon,tt program.bc -o program.wbc ```
+``` 
+$LLVM_BIN/opt -load /build/lib/libMemoryMonitor.so -memoryMonitor -debug-only=memon,tt program.bc -o program.wbc
+```
 
 The code above will debug both the instrumentation and the Type Table construction
 
@@ -140,11 +144,6 @@ Whiro computes some statistics during instrumentation that can be viewed using t
 * Number of variables shadowed in the stack
 * Number of heap operations
 * Number of functions instrumented
-* Number of variables with different SSA types
-
-
-
-
-
+* Number of variables with different SSA types 
 
 
