@@ -2,7 +2,7 @@
 
 set -e
 WHIRODIR=../
-LLVM=/home/jw/llvm-10/build/bin
+LLVM=/home/jw/llvm-project/build/bin
 
 debugMM=""
 debugTT=""
@@ -60,12 +60,12 @@ for arg in "$@"; do
   case "$arg" in
     "-dmm")debugMM="-debug-only=memon";;
     "-dtt")debugTT="-debug-only=tt";;
-    "-om")onlymain="-onlyMain";;
-    "-stk")stack="-insStack";;
-    "-stc")static="-insStatic";;
-    "-hp")heap="-insHeap";;
-    "-fh")fullheap="-insFullHeap";;
-    "-p")precise="-trackPtr";;	
+    "-om")onlymain="-om";;
+    "-stk")stack="-stk";;
+    "-stc")static="-stc";;
+    "-hp")heap="-hp";;
+    "-fh")fullheap="-fh";;
+    "-pr")precise="-pr";;	
     "-h")help=true;;
   esac
 done

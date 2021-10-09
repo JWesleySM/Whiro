@@ -49,17 +49,17 @@
 using namespace llvm;
 
 //This flag tells the pass to create inspection points only in the main function or in every user-defined function (default).
-cl::opt<bool> OnlyMain ("onlyMain", cl::init(false), cl::desc("Instrument only the main function of the program"));
+cl::opt<bool> OnlyMain ("om", cl::init(false), cl::desc("Instrument only the main function of the program"));
 //This flag tells the pass to inspect the variables stored in the stack of functions
-cl::opt<bool> InsStack ("insStack", cl::init(false), cl::desc("Inspect only the variables on the stack of functions"));
+cl::opt<bool> InsStack ("stk", cl::init(false), cl::desc("Inspect only the variables on the stack of functions"));
 //This flag tells the pass to inspect the variables that point to heap-allocated data
-cl::opt<bool> InsHeap ("insHeap", cl::init(false), cl::desc("Inspect only the variables pointing to the heap"));
+cl::opt<bool> InsHeap ("hp", cl::init(false), cl::desc("Inspect only the variables pointing to the heap"));
 //This flag tells the pass to inspect the variables stored in static memory
-cl::opt<bool> InsStatic ("insStatic", cl::init(false), cl::desc("Inspect only the static variables"));
+cl::opt<bool> InsStatic ("stc", cl::init(false), cl::desc("Inspect only the static variables"));
 //This flag tells the pass to inspect the content pointed by pointers. This characterizes the PRECISE mode
-cl::opt<bool> TrackPtr ("trackPtr", cl::init(false), cl::desc("Track the content of pointers"));
+cl::opt<bool> TrackPtr ("pr", cl::init(false), cl::desc("Enables precise mode"));
 //This flag tells the pass to inspect the entire heap at the inspection points
-cl::opt<bool> InsFullHeap ("insFullHeap", cl::init(false), cl::desc("Inspect the entire heap"));
+cl::opt<bool> InsFullHeap ("fp", cl::init(false), cl::desc("Inspect the entire heap"));
 
 STATISTIC(TotalVars, "Number of variables inspected");
 STATISTIC(ExtendedVars, "Number of extended live ranges");
