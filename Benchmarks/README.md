@@ -11,7 +11,7 @@ customization [options](https://github.com/JWesleySM/NewWhiro#customizations) di
 * **-hp**:  inspect only heap-allocated data
 * **-fp**:  report the entire heap at every inspection point
 * **-p**:   enable precise instrumentation mode (track the contents pointed by pointer variables)
-* **-h**:   displays this help
+* **-h**:   displays usage
 
 **Important**: In order to use this script, set the path to your LLVM installation at line 5.
 
