@@ -11,7 +11,7 @@ Whiro has two main components:
 
 # Whiro Workflow
 
-Put an image (maybe the final one of your dissertation?)
+![alt text](https://github.com/JWesleySM/NewWhiro/blob/main/WhiroWorkflow.png "Whiro Workflow")
 
 The figure above depicts a summary of how Whiro works
 At compilation time, the instrumentation pass builds the static components of the memory monitor. First, it gathers information concerning the types present in the original program and builds the type table. Then, it analyzes the entire intermediate representation to create the global map G and the stack maps S for each function in the program. Using this information, the monitor inserts all the required instrumentation in the program to track and report its internal state. The instrumented program is statically linked against the bytecodes containing the dynamic components of the memory monitor.  At execution time, the instrumented version of the program reads the type table T and executes normally while updating the heap table H and using the composite inspector as an auxiliary library at the inspection points.
