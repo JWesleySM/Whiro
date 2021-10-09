@@ -12,7 +12,7 @@
  * @param FuncName is the name of the function currently being inspected
  * @param CallCounter is the current value of the call counter of FuncName
  */
-void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* Name, char* FuncName, int CallCounter);
+void WhiroInspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* Name, char* FuncName, int CallCounter);
 
 /**
  * This function is responsible to report a value pointed by a pointer in the program. If
@@ -25,7 +25,7 @@ void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* N
  * @param FuncName is the name of the function currently being inspected
  * @param CallCounter is the current value of the call counter of FuncName
  */
-void inspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter);
+void WhiroInspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter);
 
 /**
  * This function will track the pointer to print its contents. It checks if Ptr
@@ -41,7 +41,7 @@ void inspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char
  * @param FuncName is the name of the function currently being inspected
  * @param CallCounter is the current value of the call counter of FuncName
  */
-void trackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter);
+void WhiroTrackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter);
 
 /**
  * This function is in charge of inspecting variables of union type. Whiro 
@@ -53,7 +53,7 @@ void trackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* 
  * @param FuncName is the name of the function currently being inspected
  * @param CallCounter is the current value of the call counter of FuncName
  */
-void inspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* FuncName, int CallCounter);
+void WhiroInspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* FuncName, int CallCounter);
 
 /**
  * This function inspects a structure type. It retrieves the type descriptor using
@@ -65,7 +65,7 @@ void inspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* 
  * @param FuncName is the name of the function currently being inspected
  * @param CallCounter is the current value of the call counter of FuncName
  */
-void inspectStruct(FILE* OutputFile, void* Struct, int TypeIndex, char* Name, char* FuncName, int CallCounter);
+void WhiroInspectStruct(FILE* OutputFile, void* Struct, int TypeIndex, char* Name, char* FuncName, int CallCounter);
 
 
 #endif

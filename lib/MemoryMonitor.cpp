@@ -68,7 +68,7 @@ STATISTIC(HeapOperations, "Number of heap operations");
 STATISTIC(InstFunc, "Number of functions instrumented");
 STATISTIC(DiffVar, "Number of variables with different SSA types");
 
-std::string MemoryMonitor::getSourceLine(Instruction* I){
+std::string MemoryMonitor::GetSourceLine(Instruction* I){
   if(I->hasMetadata("dbg")){
     MDNode* MD = I->getMetadata("dbg");
     if(DILocation* Loc = dyn_cast<DILocation>(MD))
@@ -77,13 +77,13 @@ std::string MemoryMonitor::getSourceLine(Instruction* I){
   return "undertemined";
 }
 
-CallInst* MemoryMonitor::insertFunctionCall(std::string FuncName, Type* ReturnType, std::vector<Type*>ArgsType, std::vector<Value*>Args, IRBuilder<> Builder, bool IsVarArg){
+CallInst* MemoryMonitor::InsertFunctionCall(std::string FuncName, Type* ReturnType, std::vector<Type*>ArgsType, std::vector<Value*>Args, IRBuilder<> Builder, bool IsVarArg){
   FunctionType *FuncType = FunctionType::get(ReturnType, ArgsType, IsVarArg);
   FunctionCallee FuncCallee = this->M->getOrInsertFunction(FuncName, FuncType);
   return Builder.CreateCall(FuncCallee, Args);
 }
 
-void MemoryMonitor::openOutputFile(IRBuilder<> Builder){
+void MemoryMonitor::OpenOutputFile(IRBuilder<> Builder){
   //Creating the global output file.
   StructType* IO_FILE = (StructType::create(M->getContext(), "struct._IO_FILE"));
   StructType* IO_marker = (StructType::create(M->getContext(), "struct._IO_marker"));
@@ -132,15 +132,15 @@ void MemoryMonitor::openOutputFile(IRBuilder<> Builder){
 
   Args.push_back(Builder.CreateGlobalStringPtr( StringRef(ProgramName + "_Output"), "str"));
   Args.push_back(Builder.CreateGlobalStringPtr(StringRef("w"), "str"));
-  Builder.CreateStore(insertFunctionCall("fopen", IO_FILE_Ptr, ArgsType, Args, Builder, false), this->OutputFile);
+  Builder.CreateStore(InsertFunctionCall("fopen", IO_FILE_Ptr, ArgsType, Args, Builder, false), this->OutputFile);
 }
 
-void MemoryMonitor::closeOutputFile(Value* OutputFilePtr, IRBuilder<> Builder){
+void MemoryMonitor::CloseOutputFile(Value* OutputFilePtr, IRBuilder<> Builder){
   FunctionCallee FcloseCall = M->getOrInsertFunction("fclose", Builder.getInt32Ty(), this->OutputFileType);
   Builder.CreateCall(FcloseCall, OutputFilePtr);
 }
 
-bool MemoryMonitor::shouldProcessType(DIType *DIT){
+bool MemoryMonitor::ShouldProcessType(DIType *DIT){
   if(!DIT)
     return true;
   
@@ -151,7 +151,7 @@ bool MemoryMonitor::shouldProcessType(DIType *DIT){
     if(DIDT->getTag() == dwarf::DW_TAG_member || DIDT->getTag() == dwarf::DW_TAG_ptr_to_member_type)
       return false;
     else
-      return shouldProcessType(DIDT->getBaseType());
+      return ShouldProcessType(DIDT->getBaseType());
   }
   
   if(DICompositeType* DICT = dyn_cast<DICompositeType>(DIT)){
@@ -167,7 +167,7 @@ bool MemoryMonitor::shouldProcessType(DIType *DIT){
   return true;
 }
 
-int MemoryMonitor::getTypeFormat(DIType* DIT){
+int MemoryMonitor::GetTypeFormat(DIType* DIT){
   //The return of this function is a code representing the format of the data which will be inserted in the 
   //pointers table. It tells the table how to print this data.
   int Format;
@@ -242,7 +242,7 @@ int MemoryMonitor::getTypeFormat(DIType* DIT){
          
     case dwarf::DW_TAG_const_type:  
     case dwarf::DW_TAG_typedef:
-      return getTypeFormat(dyn_cast<DIDerivedType>(DIT)->getBaseType());
+      return GetTypeFormat(dyn_cast<DIDerivedType>(DIT)->getBaseType());
           
     default:
       #define DEBUG_TYPE "tt"
@@ -253,7 +253,7 @@ int MemoryMonitor::getTypeFormat(DIType* DIT){
   return Format;
 }
 
-std::string MemoryMonitor::makeTypeName(DIType* DIT){
+std::string MemoryMonitor::MakeTypeName(DIType* DIT){
   std::string TypeName;
   
   if(!DIT)
@@ -263,11 +263,11 @@ std::string MemoryMonitor::makeTypeName(DIType* DIT){
   else if(DIDerivedType* DIDT = dyn_cast<DIDerivedType>(DIT)){
     switch(DIDT->getTag()){
       case dwarf::DW_TAG_pointer_type:
-        TypeName = "pointer to " + makeTypeName(DIDT->getBaseType());
+        TypeName = "pointer to " + MakeTypeName(DIDT->getBaseType());
         break;
         
       case dwarf::DW_TAG_const_type:
-        TypeName = "const " + makeTypeName(DIDT->getBaseType());
+        TypeName = "const " + MakeTypeName(DIDT->getBaseType());
         break;
         
       case dwarf::DW_TAG_typedef:
@@ -278,7 +278,7 @@ std::string MemoryMonitor::makeTypeName(DIType* DIT){
   else if(DICompositeType* DICT = dyn_cast<DICompositeType>(DIT)){
     switch(DICT->getTag()){
       case dwarf::DW_TAG_array_type:
-        TypeName = "array of " + makeTypeName(DICT->getBaseType());
+        TypeName = "array of " + MakeTypeName(DICT->getBaseType());
         break;
         
       case dwarf::DW_TAG_structure_type:
@@ -297,7 +297,7 @@ std::string MemoryMonitor::makeTypeName(DIType* DIT){
   return TypeName;
 }
 
-std::string MemoryMonitor::makeTypeName(Type* T){
+std::string MemoryMonitor::MakeTypeName(Type* T){
   std::string TypeName;
   
   if(T->isVoidTy())
@@ -330,10 +330,10 @@ std::string MemoryMonitor::makeTypeName(Type* T){
     TypeName = "double";
   
   if(T->isPointerTy())
-    TypeName = "pointer to " + makeTypeName(dyn_cast<PointerType>(T)->getElementType());
+    TypeName = "pointer to " + MakeTypeName(dyn_cast<PointerType>(T)->getElementType());
   
   if(T->isArrayTy())
-    TypeName = "array of " + makeTypeName(T->getArrayElementType());
+    TypeName = "array of " + MakeTypeName(T->getArrayElementType());
   
   if(T->isStructTy()){
     //The struct type names are like struct.Name 
@@ -348,7 +348,7 @@ std::string MemoryMonitor::makeTypeName(Type* T){
   return TypeName;  
 }
 
-void MemoryMonitor::writeTypeDescriptor(const char* TypeName, int QuantFields, int Format, int Offset, int BaseTypeIndex, FILE* TypeTableFile, int* TypeTableSize, DINodeArray Fields){
+void MemoryMonitor::WriteTypeDescriptor(const char* TypeName, int QuantFields, int Format, int Offset, int BaseTypeIndex, FILE* TypeTableFile, int* TypeTableSize, DINodeArray Fields){
   #define DEBUG_TYPE "tt"
   LLVM_DEBUG(dbgs() << "Creating type table entry " << TypeName <<". Number of Fields = " << QuantFields <<"\n";);
   #undef DEBUG_TYPE
@@ -360,9 +360,9 @@ void MemoryMonitor::writeTypeDescriptor(const char* TypeName, int QuantFields, i
     for(unsigned i = 0; i < Fields.size(); i++){
       DIDerivedType* Field = dyn_cast<DIDerivedType>(Fields[i]);
       std::string FieldName = Field->getName().str();
-      int FieldFormat = getTypeFormat(Field->getBaseType());
+      int FieldFormat = GetTypeFormat(Field->getBaseType());
       int FieldBaseTypeIndex = FieldFormat;
-      if(!shouldProcessType(Field->getBaseType()))
+      if(!ShouldProcessType(Field->getBaseType()))
         FieldFormat = FieldBaseTypeIndex = 18;
       else if(DIDerivedType* DIDT = dyn_cast<DIDerivedType>(Field->getBaseType())){
         //Get the base type index for this type          
@@ -411,10 +411,10 @@ void MemoryMonitor::writeTypeDescriptor(const char* TypeName, int QuantFields, i
    }
 }
 
-void MemoryMonitor::createTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* TypeTableSize){
+void MemoryMonitor::CreateTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* TypeTableSize){
   DINodeArray Fields;
-  std::string TypeName = makeTypeName(DIT);
-  int Format = getTypeFormat(DIT);
+  std::string TypeName = MakeTypeName(DIT);
+  int Format = GetTypeFormat(DIT);
   int BaseTypeIndex = Format;
   int QuantFields;
   int Offset;
@@ -429,22 +429,6 @@ void MemoryMonitor::createTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* 
     Offset = 0;
   }
   else if(DIDerivedType* DIDT = dyn_cast<DIDerivedType>(DIT)){
-    /*switch(DIDT->getTag()){
-      case dwarf::DW_TAG_pointer_type:
-        if(DIDT->getBaseType())
-          Format = 13;
-        else 
-          Format = BaseTypeIndex = 14; //Pointer to void*
-        break;
-        
-      case dwarf::DW_TAG_const_type:
-        Format = getTypeFormat(DIDT->getBaseType());
-        break;
-        
-      case dwarf::DW_TAG_typedef:
-        Format = getTypeFormat(DIDT->getBaseType());
-        break;
-    }*/
     //Get the base type index for this type          
     for(auto &T : this->TypeIndexes){
       if(std::get<2>(T) == DIDT->getBaseType()){
@@ -488,10 +472,10 @@ void MemoryMonitor::createTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* 
     return;
   }
   
-  writeTypeDescriptor(TypeName.c_str(), QuantFields, Format, Offset, BaseTypeIndex, TypeTableFile, TypeTableSize, Fields);
+  WriteTypeDescriptor(TypeName.c_str(), QuantFields, Format, Offset, BaseTypeIndex, TypeTableFile, TypeTableSize, Fields);
 }
 
-std::pair<std::string, int> MemoryMonitor::createTypeTable(){  
+std::pair<std::string, int> MemoryMonitor::CreateTypeTable(){  
   std::string TypeTableFileName = this->M->getSourceFileName();
   std::size_t ExtensionIndex = TypeTableFileName.rfind('.');
   TypeTableFileName.erase(ExtensionIndex);
@@ -503,10 +487,10 @@ std::pair<std::string, int> MemoryMonitor::createTypeTable(){
   //First, construct the type indexes
   for(DIType* DIT : this->DbgFinder.types()){
     
-    if(!shouldProcessType(DIT))
+    if(!ShouldProcessType(DIT))
       continue;
     
-    std::string TypeName = makeTypeName(DIT);
+    std::string TypeName = MakeTypeName(DIT);
     //If the name of the type is greater than 128 characters, we truncate it
     if(TypeName.size() > 128)
       TypeName = TypeName.substr(0, 125) + "...";
@@ -519,7 +503,7 @@ std::pair<std::string, int> MemoryMonitor::createTypeTable(){
   int TypeTableSize = 0;
   
   for(auto &T : this->TypeIndexes)
-    createTypeDescriptor(std::get<2>(T), TypeTableFile, &TypeTableSize);
+    CreateTypeDescriptor(std::get<2>(T), TypeTableFile, &TypeTableSize);
     
   fclose(TypeTableFile);
   #define DEBUG_TYPE "tt"
@@ -527,17 +511,16 @@ std::pair<std::string, int> MemoryMonitor::createTypeTable(){
     dbgs() << "Type Table:\n";
     for(auto &T : this->TypeIndexes)
       dbgs() << std::get<1>(T) << " -> " << std::get<0>(T) <<"\n";
-    dbgs() << "Type table size " << TypeTableSize << " | " << TypeIndex <<"\n";
+    dbgs() << "Type table size " << TypeTableSize << "\n";
   );
   #define DEBUG_TYPE "tt"
   return std::make_pair(TypeTableFileName, TypeTableSize);
 }
 
-void MemoryMonitor::openTypeTable(std::string ProgramName, int Size, IRBuilder<> Builder){
+void MemoryMonitor::OpenTypeTable(std::string ProgramName, int Size, IRBuilder<> Builder){
   std::vector<Type*>ArgsType;
   std::vector<Value*>Args;
   
-  errs() << "Change the types for short?\n";
   ArgsType.push_back(Builder.getInt8PtrTy());
   ArgsType.push_back(Builder.getInt32Ty());
   ArgsType.push_back(Builder.getInt32Ty());
@@ -552,10 +535,10 @@ void MemoryMonitor::openTypeTable(std::string ProgramName, int Size, IRBuilder<>
   Args.push_back(Heap);
   Args.push_back(Stack);
   Args.push_back(PreciseMode);
-  insertFunctionCall("openTypeTable", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroOpenTypeTable", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-Value* MemoryMonitor::createFunctionCounter(Function* F, IRBuilder<> Builder){
+Value* MemoryMonitor::CreateFunctionCounter(Function* F, IRBuilder<> Builder){
   //The function counter is global.
   std::string CounterName = F->getName().str() + "_counter";
   GlobalVariable* Counter = new GlobalVariable(*(this->M), Builder.getInt32Ty(), false, GlobalValue::CommonLinkage, Constant::getNullValue(Builder.getInt32Ty()), CounterName);
@@ -572,7 +555,7 @@ Value* MemoryMonitor::createFunctionCounter(Function* F, IRBuilder<> Builder){
   
 }
 
-Value* MemoryMonitor::castPointerToVoid(Value* Ptr, IRBuilder<> Builder){ 
+Value* MemoryMonitor::CastPointerToVoid(Value* Ptr, IRBuilder<> Builder){ 
   if(CastInst::isCastable(Ptr->getType(), Builder.getInt8PtrTy())){
     //If the type of the pointee value is castable to void*, we get the best cast instruction to do it
     Instruction::CastOps CastOP = CastInst::getCastOpcode(Ptr, false, Builder.getInt8PtrTy(), false);
@@ -587,11 +570,11 @@ Value* MemoryMonitor::castPointerToVoid(Value* Ptr, IRBuilder<> Builder){
   return nullptr;
 }
 
-void MemoryMonitor::insertHeapEntry(Value* HeapPtr, Type* AllocatedType, Value* Size, Value* ArrayStep, IRBuilder<> Builder){
+void MemoryMonitor::InsertHeapEntry(Value* HeapPtr, Type* AllocatedType, Value* Size, Value* ArrayStep, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(
     Instruction* HeapPtrAsInst = dyn_cast<Instruction>(HeapPtr);
-    dbgs() << "Inserting entry in the Heap Table. Allocation at line " << getSourceLine(HeapPtrAsInst) << "\n";
+    dbgs() << "Inserting entry in the Heap Table. Allocation at line " << GetSourceLine(HeapPtrAsInst) << "\n";
   );
   #undef DEBUG_TYPE
   
@@ -606,22 +589,22 @@ void MemoryMonitor::insertHeapEntry(Value* HeapPtr, Type* AllocatedType, Value* 
   if(AllocatedType->isPointerTy())
     AllocatedType = dyn_cast<PointerType>(AllocatedType)->getElementType();
 
-  int TypeIndex = getTypeIndex(AllocatedType);
+  int TypeIndex = GetTypeIndex(AllocatedType);
   
   //If this pointer is not void*, we need to cast it
-  HeapPtr = (HeapPtr->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(HeapPtr, Builder) : HeapPtr;
+  HeapPtr = (HeapPtr->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(HeapPtr, Builder) : HeapPtr;
   Args.push_back(HeapPtr);
   Args.push_back(Size);
   Args.push_back(ArrayStep);
   Args.push_back(ConstantInt::get(Builder.getInt32Ty(), TypeIndex));
-  insertFunctionCall("insertHeapEntry", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroInsertHeapEntry", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-void MemoryMonitor::updateHeapEntrySize(Value* HeapPtr, Value* NewSize, IRBuilder<> Builder){
+void MemoryMonitor::UpdateHeapEntrySize(Value* HeapPtr, Value* NewSize, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(
     Instruction* HeapPtrAsInst = dyn_cast<Instruction>(HeapPtr);
-    dbgs() << "Updating size of heap entry. Reallocation at function " << HeapPtrAsInst->getFunction()->getName() << " at line " << getSourceLine(HeapPtrAsInst) << ". File: " << HeapPtrAsInst->getFunction()->getSubprogram()->getFile()->getFilename() << "\n"; HeapPtrAsInst->dump();
+    dbgs() << "Updating size of heap entry. Reallocation at function " << HeapPtrAsInst->getFunction()->getName() << " at line " << GetSourceLine(HeapPtrAsInst) << ". File: " << HeapPtrAsInst->getFunction()->getSubprogram()->getFile()->getFilename() << "\n"; HeapPtrAsInst->dump();
   );
   #undef DEBUG_TYPE
   
@@ -632,17 +615,17 @@ void MemoryMonitor::updateHeapEntrySize(Value* HeapPtr, Value* NewSize, IRBuilde
   ArgsType.push_back(Builder.getInt64Ty());
   
   //If this pointer is not void*, we need to cast it
-  HeapPtr = (HeapPtr->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(HeapPtr, Builder) : HeapPtr;
+  HeapPtr = (HeapPtr->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(HeapPtr, Builder) : HeapPtr;
   Args.push_back(HeapPtr);
   Args.push_back(NewSize);
-  insertFunctionCall("updateHeapEntrySize", Builder.getVoidTy(), ArgsType, Args, Builder, false);  
+  InsertFunctionCall("WhiroUpdateHeapEntrySize", Builder.getVoidTy(), ArgsType, Args, Builder, false);  
 }
 
-void MemoryMonitor::deleteHeapEntry(Value* HeapPtr, IRBuilder<> Builder){
+void MemoryMonitor::DeleteHeapEntry(Value* HeapPtr, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(
     Instruction* HeapPtrAsInst = dyn_cast<Instruction>(HeapPtr);
-    dbgs() << "Setting Heap Table entry as unreachable. Deallocation at function " << HeapPtrAsInst->getFunction()->getName() << " at line " << getSourceLine(HeapPtrAsInst) << ". File: " << HeapPtrAsInst->getFunction()->getSubprogram()->getFile()->getFilename() << "\n"; HeapPtrAsInst->dump();
+    dbgs() << "Setting Heap Table entry as unreachable. Deallocation at function " << HeapPtrAsInst->getFunction()->getName() << " at line " << GetSourceLine(HeapPtrAsInst) << ". File: " << HeapPtrAsInst->getFunction()->getSubprogram()->getFile()->getFilename() << "\n"; HeapPtrAsInst->dump();
   );
   #undef DEBUG_TYPE
   
@@ -651,16 +634,16 @@ void MemoryMonitor::deleteHeapEntry(Value* HeapPtr, IRBuilder<> Builder){
   
   ArgsType.push_back(Builder.getInt8PtrTy());
   Args.push_back(HeapPtr);
-  insertFunctionCall("deleteHeapEntry", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroDeleteHeapEntry", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-void MemoryMonitor::handleHeapOperation(CallInst* HeapOp, IRBuilder<> Builder){
+void MemoryMonitor::HandleHeapOperation(CallInst* HeapOp, IRBuilder<> Builder){
   //Once a heap operation is found, we need to update the Heap Table
   Builder.SetInsertPoint(HeapOp->getNextNode());
   
   //If this is a deallocation, we'll set the corresponding address as unreachable in the table
   if(HeapOp->getName() == "free"){
-    deleteHeapEntry(HeapOp->getOperand(0), Builder);
+    DeleteHeapEntry(HeapOp->getOperand(0), Builder);
     HeapOperations++;
     return;
   }
@@ -693,14 +676,14 @@ void MemoryMonitor::handleHeapOperation(CallInst* HeapOp, IRBuilder<> Builder){
   
   
   if(HeapOp->getCalledFunction()->getName() == "realloc")
-    updateHeapEntrySize(HeapOp, QuantAllocated, Builder);
+    UpdateHeapEntrySize(HeapOp, QuantAllocated, Builder);
   else
-    insertHeapEntry(HeapOp, HeapType, QuantAllocated, QuantAllocated, Builder);   
+    InsertHeapEntry(HeapOp, HeapType, QuantAllocated, QuantAllocated, Builder);   
  
   HeapOperations++;
 }
 
-std::string MemoryMonitor::getFormatSpecifier(DIType* VarType){
+std::string MemoryMonitor::GetFormatSpecifier(DIType* VarType){
   std::string FormatSpecifier = "";
   unsigned TypeEncoding;
   
@@ -710,7 +693,7 @@ std::string MemoryMonitor::getFormatSpecifier(DIType* VarType){
   if(DIBasicType* DIBT = dyn_cast<DIBasicType>(VarType))
     TypeEncoding = DIBT->getEncoding();
   else if(DIDerivedType* DIDT = dyn_cast<DIDerivedType>(VarType))
-    return getFormatSpecifier(DIDT->getBaseType());
+    return GetFormatSpecifier(DIDT->getBaseType());
   else if(DICompositeType* DICT = dyn_cast<DICompositeType>(VarType)){
     if(DICT->getTag() == dwarf::DW_TAG_array_type || DICT->getTag() == dwarf::DW_TAG_enumeration_type) //We always print integer in case of enumerations or arrays (hashcode)
     return "%d\n";
@@ -765,8 +748,8 @@ std::string MemoryMonitor::getFormatSpecifier(DIType* VarType){
   return FormatSpecifier;
 }
 
-int MemoryMonitor::getTypeIndex(Type* T){
-  std::string TypeName = makeTypeName(T);
+int MemoryMonitor::GetTypeIndex(Type* T){
+  std::string TypeName = MakeTypeName(T);
   
   //50000 is a special value that the memory monitor uses to tell Whiro it does not
   //know how to inspect a variable of this type
@@ -797,7 +780,7 @@ int MemoryMonitor::getTypeIndex(Type* T){
     
 }
 
-void MemoryMonitor::inspectScalar(DIVariable* Scalar, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter,  IRBuilder<> Builder, bool Scalarized){
+void MemoryMonitor::InspectScalar(DIVariable* Scalar, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter,  IRBuilder<> Builder, bool Scalarized){
   if(ValidDef->getType()->isPointerTy()){
     PointerType* PT = dyn_cast<PointerType>(ValidDef->getType());
     while(PT->getElementType()->isPointerTy()){
@@ -817,7 +800,7 @@ void MemoryMonitor::inspectScalar(DIVariable* Scalar, Value* ValidDef, Value* Ou
     STDOUTText += " (scalarized)";
   
   STDOUTText += std::string(" : ");
-  std::string Format = getFormatSpecifier(Scalar->getType());
+  std::string Format = GetFormatSpecifier(Scalar->getType());
   STDOUTText += Format;
   
   //if we're about to print a float variable, LLVM first converts it to a double.
@@ -838,10 +821,10 @@ void MemoryMonitor::inspectScalar(DIVariable* Scalar, Value* ValidDef, Value* Ou
   Args.push_back(CallCounter);
   Args.push_back(ValidDef);
    
-  insertFunctionCall("fprintf", Builder.getInt32Ty(), ArgsType, Args, Builder, true);
+  InsertFunctionCall("fprintf", Builder.getInt32Ty(), ArgsType, Args, Builder, true);
 }
 
-void MemoryMonitor::inspectPointer(DIVariable* Pointer, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
+void MemoryMonitor::InspectPointer(DIVariable* Pointer, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
   //If the SSADef is a slot in the stack (AllocaInst), we need to read from that address
   if(dyn_cast<AllocaInst>(ValidDef) || isa<GlobalValue>(ValidDef))
     ValidDef = Builder.CreateLoad(ValidDef);
@@ -851,13 +834,13 @@ void MemoryMonitor::inspectPointer(DIVariable* Pointer, Value* ValidDef, Value* 
   if(FinalType->isPointerTy())
     FinalType = dyn_cast<PointerType>(FinalType)->getElementType();        
   
-  int TypeIndex = getTypeIndex(FinalType);
+  int TypeIndex = GetTypeIndex(FinalType);
   //If for some reason we could not determine the type index of this variable, we are not able to inspect it
   if(TypeIndex == 50000)
     return;
   
   //If this Value is not pointer is not void*, we need to cast it
-  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(ValidDef, Builder) : ValidDef;
+  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
   std::string Scope = (isa<DIGlobalVariable>(Pointer)) ? "Static " : Pointer->getScope()->getName().str();
   
@@ -880,10 +863,10 @@ void MemoryMonitor::inspectPointer(DIVariable* Pointer, Value* ValidDef, Value* 
   Args.push_back(Builder.CreateGlobalStringPtr(Scope));
   Args.push_back(CallCounter);
   
-  insertFunctionCall("inspectPointer", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroInspectPointer", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-void MemoryMonitor::inspectUnion(DIVariable* Union, Value* ValidDef, DICompositeType* UnionType, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
+void MemoryMonitor::InspectUnion(DIVariable* Union, Value* ValidDef, DICompositeType* UnionType, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
   //The address pointed by the pointer is retrieved using the pointer.
   if(ValidDef->getType()->isPointerTy()){
     PointerType* PT = dyn_cast<PointerType>(ValidDef->getType());
@@ -894,7 +877,7 @@ void MemoryMonitor::inspectUnion(DIVariable* Union, Value* ValidDef, DIComposite
   }
     
   //If this pointer is not void*, we need to cast it
-  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(ValidDef, Builder) : ValidDef;
+  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
   std::string Scope = (isa<DIGlobalVariable>(Union)) ? "Static " : Union->getScope()->getName().str();  
   
@@ -917,10 +900,10 @@ void MemoryMonitor::inspectUnion(DIVariable* Union, Value* ValidDef, DIComposite
   Args.push_back(Builder.CreateGlobalStringPtr(Scope));
   Args.push_back(CallCounter);
   
-  insertFunctionCall("inspectUnion", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroInspectUnion", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-void MemoryMonitor::inspectStruct(DIVariable* Struct, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter,  IRBuilder<> Builder){
+void MemoryMonitor::InspectStruct(DIVariable* Struct, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter,  IRBuilder<> Builder){
   //If the SSADef is a pointer to a struct, we need to load it to get the actual value
   if(ValidDef->getType()->isPointerTy()){
     PointerType* PT = dyn_cast<PointerType>(ValidDef->getType());
@@ -932,7 +915,7 @@ void MemoryMonitor::inspectStruct(DIVariable* Struct, Value* ValidDef, Value* Ou
   
   //If we have scalarized struct value, Whiro prints it as a scalar
   if(!ValidDef->getType()->isPointerTy() || ValidDef->getType()->isSingleValueType()){
-    inspectScalar(Struct, ValidDef, OutputFilePtr, CallCounter, Builder, true);
+    InspectScalar(Struct, ValidDef, OutputFilePtr, CallCounter, Builder, true);
     return;
   }
   
@@ -941,13 +924,13 @@ void MemoryMonitor::inspectStruct(DIVariable* Struct, Value* ValidDef, Value* Ou
   if(FinalType->isPointerTy())
     FinalType = dyn_cast<PointerType>(FinalType)->getElementType();        
   
-  int TypeIndex = getTypeIndex(FinalType);
+  int TypeIndex = GetTypeIndex(FinalType);
   //If for some reason we could not determine the type index of this variable, we are not able to inspect it
   if(TypeIndex == 50000)
     return;
   
   //If this pointer is not void*, we need to cast it
-  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(ValidDef, Builder) : ValidDef;
+  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
   std::string Scope = (isa<DIGlobalVariable>(Struct)) ? "Static " : Struct->getScope()->getName().str();
   
@@ -970,10 +953,10 @@ void MemoryMonitor::inspectStruct(DIVariable* Struct, Value* ValidDef, Value* Ou
   Args.push_back(Builder.CreateGlobalStringPtr(Scope));
   Args.push_back(CallCounter);
   
-  insertFunctionCall("inspectStruct", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroInspectStruct", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-void MemoryMonitor::inspectArray(DIVariable* Array, Value* ValidDef, DICompositeType* ArrayType, Value* OutputFilePtr, llvm::Value* CallCounter, IRBuilder<> Builder){
+void MemoryMonitor::InspectArray(DIVariable* Array, Value* ValidDef, DICompositeType* ArrayType, Value* OutputFilePtr, llvm::Value* CallCounter, IRBuilder<> Builder){
   if(ValidDef->getType()->isPointerTy()){
     PointerType* PT = dyn_cast<PointerType>(ValidDef->getType());
     while(PT->getElementType()->isPointerTy()){
@@ -983,7 +966,7 @@ void MemoryMonitor::inspectArray(DIVariable* Array, Value* ValidDef, DIComposite
   }
   //If we have scalarized array value, Whiro prints it as a scalar
   if(!ValidDef->getType()->isPointerTy() || ValidDef->getType()->isSingleValueType()){
-    inspectScalar(Array, ValidDef, OutputFilePtr, CallCounter, Builder, true);
+    InspectScalar(Array, ValidDef, OutputFilePtr, CallCounter, Builder, true);
     return;
   }
   
@@ -1005,7 +988,7 @@ void MemoryMonitor::inspectArray(DIVariable* Array, Value* ValidDef, DIComposite
         DimSize = Count.get<ConstantInt*>();
       else if(Count.is<DIVariable*>()){
         DIVariable* DV = Count.get<DIVariable*>();
-        DimSize = getValidDef(this->CurrentStackMap[DV->getName().str()].second, Builder.GetInsertBlock(), nullptr, Builder);
+        DimSize = GetValidDef(this->CurrentStackMap[DV->getName().str()].second, Builder.GetInsertBlock(), nullptr, Builder);
       }
       TotalElem = Builder.CreateMul(TotalElem, DimSize);
     }
@@ -1018,13 +1001,13 @@ void MemoryMonitor::inspectArray(DIVariable* Array, Value* ValidDef, DIComposite
     Step = Count.get<ConstantInt*>();
   else if(Count.is<DIVariable*>()){
     DIVariable* DV = Count.get<DIVariable*>();
-    Step = getValidDef(this->CurrentStackMap[DV->getName().str()].second, Builder.GetInsertBlock(), nullptr, Builder);
+    Step = GetValidDef(this->CurrentStackMap[DV->getName().str()].second, Builder.GetInsertBlock(), nullptr, Builder);
   }
   
   //If this Value is not pointer is not void*, we need to cast it
-  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? castPointerToVoid(ValidDef, Builder) : ValidDef;
+  ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
     
-  int Format = getTypeFormat(ArrayType->getBaseType());
+  int Format = GetTypeFormat(ArrayType->getBaseType());
   
   //Uncomment this line to ignore I/O printing time
   //return;
@@ -1041,10 +1024,10 @@ void MemoryMonitor::inspectArray(DIVariable* Array, Value* ValidDef, DIComposite
   Args.push_back(Step);
   Args.push_back(ConstantInt::get(Builder.getInt32Ty(), Format));
   
-  inspectScalar(Array, insertFunctionCall("computeHashcode", Builder.getInt32Ty(), ArgsType, Args, Builder, false), OutputFilePtr, CallCounter, Builder, false);  
+  InspectScalar(Array, InsertFunctionCall("WhiroComputeHashcode", Builder.getInt32Ty(), ArgsType, Args, Builder, false), OutputFilePtr, CallCounter, Builder, false);  
 }
 
-void MemoryMonitor::inspectVariable(DIVariable* Var, DIType* VarType, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
+void MemoryMonitor::InspectVariable(DIVariable* Var, DIType* VarType, Value* ValidDef, Value* OutputFilePtr, Value* CallCounter, IRBuilder<> Builder){
   //If this is the first inspection point created in this function, update the number of 
   //variables inspected, only for local variables. The static are already counted
   if(this->FirstInspection && isa<DILocalVariable>(Var))
@@ -1056,7 +1039,7 @@ void MemoryMonitor::inspectVariable(DIVariable* Var, DIType* VarType, Value* Val
   //Whiro analyzes the type of a variable to decide how it will inspect it
   //Inspecting scalar variables  
   if(isa<DIBasicType>(VarType)){
-    inspectScalar(Var, ValidDef, OutputFilePtr, CallCounter, Builder, false);
+    InspectScalar(Var, ValidDef, OutputFilePtr, CallCounter, Builder, false);
     return;
   }
   
@@ -1067,7 +1050,7 @@ void MemoryMonitor::inspectVariable(DIVariable* Var, DIType* VarType, Value* Val
          if(isa<DISubroutineType>(DIDT->getBaseType())) //Whiro does not inspect pointer to functions
            return;
        }
-       inspectPointer(Var, ValidDef, OutputFilePtr, CallCounter, Builder);
+       InspectPointer(Var, ValidDef, OutputFilePtr, CallCounter, Builder);
        return;
      }
    }
@@ -1076,31 +1059,31 @@ void MemoryMonitor::inspectVariable(DIVariable* Var, DIType* VarType, Value* Val
    if(DICompositeType* DICT = dyn_cast<DICompositeType>(VarType)){
      switch(DICT->getTag()){
        case dwarf::DW_TAG_union_type:
-         inspectUnion(Var, ValidDef, DICT, OutputFilePtr, CallCounter, Builder);
+         InspectUnion(Var, ValidDef, DICT, OutputFilePtr, CallCounter, Builder);
          return;
          
        case dwarf::DW_TAG_structure_type:
-         inspectStruct(Var, ValidDef, OutputFilePtr, CallCounter, Builder);
+         InspectStruct(Var, ValidDef, OutputFilePtr, CallCounter, Builder);
          return;
          
        case dwarf::DW_TAG_array_type:
          if(isa<DIBasicType>(DICT->getBaseType()))
-           inspectArray(Var, ValidDef, DICT, OutputFilePtr, CallCounter, Builder);
+           InspectArray(Var, ValidDef, DICT, OutputFilePtr, CallCounter, Builder);
          else{
            //Inspect non-scalar array
-           errs() << "AAAAAAAAAAA\n";
+           errs() << "Do not inspect non-scalar arrays\n";
          }
          return;
          
        case dwarf::DW_TAG_enumeration_type: //Whiro reports enumerations as simple integers
-         inspectScalar(Var, ValidDef, OutputFilePtr, CallCounter, Builder, false);
+         InspectScalar(Var, ValidDef, OutputFilePtr, CallCounter, Builder, false);
          return;
      }
        
    } 
 }
 
-void MemoryMonitor::inspectEntireHeap(Value* OutputFilePtr, StringRef FuncName, Value* CallCounter, IRBuilder<> Builder){
+void MemoryMonitor::InspectEntireHeap(Value* OutputFilePtr, StringRef FuncName, Value* CallCounter, IRBuilder<> Builder){
   std::vector<Type*> ArgsType;
   std::vector<Value*> Args;
         
@@ -1112,10 +1095,10 @@ void MemoryMonitor::inspectEntireHeap(Value* OutputFilePtr, StringRef FuncName, 
   Args.push_back(Builder.CreateGlobalStringPtr(FuncName, "str"));
   Args.push_back(CallCounter);
   
-  insertFunctionCall("inspectEntireHeap", Builder.getVoidTy(), ArgsType, Args, Builder, false);
+  InsertFunctionCall("WhiroInspectEntireHeap", Builder.getVoidTy(), ArgsType, Args, Builder, false);
 }
 
-Type* MemoryMonitor::getLargestType(std::vector<DbgVariableIntrinsic*>Trace){
+Type* MemoryMonitor::GetLargestType(std::vector<DbgVariableIntrinsic*>Trace){
   Type* LargestType = dyn_cast<DbgValueInst>(Trace.front())->getValue()->getType();
   for(auto &Def : Trace){
     Type* DefType = dyn_cast<DbgValueInst>(Def)->getValue()->getType();
@@ -1126,7 +1109,7 @@ Type* MemoryMonitor::getLargestType(std::vector<DbgVariableIntrinsic*>Trace){
   return LargestType;
 }
 
-AllocaInst* MemoryMonitor::shadowInStack(std::vector<DbgVariableIntrinsic*>Trace, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
+AllocaInst* MemoryMonitor::ShadowInStack(std::vector<DbgVariableIntrinsic*>Trace, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(dbgs() << "Could not extend variable. Shadowing in the stack\n";);
   #undef DEBUG_TYPE
@@ -1141,7 +1124,7 @@ AllocaInst* MemoryMonitor::shadowInStack(std::vector<DbgVariableIntrinsic*>Trace
   //Create a stack slot at the beginning of the function. This slot must hold a value with the
   //largest type found in a trace of a variable. Initialize it with null
   Builder.SetInsertPoint(&(dyn_cast<Instruction>(Trace.front())->getFunction()->getEntryBlock()), dyn_cast<Instruction>(Trace.front())->getFunction()->getEntryBlock().begin());  
-  Type* VarLargestType = getLargestType(Trace);
+  Type* VarLargestType = GetLargestType(Trace);
   AllocaInst* VarAddr = Builder.CreateAlloca(VarLargestType, this->M->getDataLayout().getAllocaAddrSpace(), nullptr, Trace.front()->getVariable()->getName());
   VarAddr->setAlignment(Align(this->M->getDataLayout().getABITypeAlignment(VarLargestType)));
   Builder.CreateStore(Constant::getNullValue(VarLargestType), VarAddr);
@@ -1191,7 +1174,7 @@ AllocaInst* MemoryMonitor::shadowInStack(std::vector<DbgVariableIntrinsic*>Trace
   return VarAddr;
 }
 
-PHINode* MemoryMonitor::extendLiveRange(std::vector<DbgVariableIntrinsic*>Trace, BasicBlock* InsBlock, IRBuilder<> Builder){
+PHINode* MemoryMonitor::ExtendLiveRange(std::vector<DbgVariableIntrinsic*>Trace, BasicBlock* InsBlock, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(dbgs() << "Extending Live Range\n";);
   #undef DEBUG_TYPE
@@ -1205,7 +1188,7 @@ PHINode* MemoryMonitor::extendLiveRange(std::vector<DbgVariableIntrinsic*>Trace,
     }
   }
   
-  Type* VarLargestType = getLargestType(Trace);
+  Type* VarLargestType = GetLargestType(Trace);
   PHINode* PN = PHINode::Create(VarLargestType, 2);
   
   //Traverse the trace of the variable looking for SSA definitions that reach the inspection block
@@ -1265,7 +1248,7 @@ PHINode* MemoryMonitor::extendLiveRange(std::vector<DbgVariableIntrinsic*>Trace,
     return nullptr;
 }
 
-Value* MemoryMonitor::getValidDef(std::vector<DbgVariableIntrinsic*>Trace, BasicBlock* InsBlock, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
+Value* MemoryMonitor::GetValidDef(std::vector<DbgVariableIntrinsic*>Trace, BasicBlock* InsBlock, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
   Value* ValidDef = nullptr;
   DominatorTree* DT = new DominatorTree(*(InsBlock->getParent()));
   
@@ -1299,15 +1282,15 @@ Value* MemoryMonitor::getValidDef(std::vector<DbgVariableIntrinsic*>Trace, Basic
   //range of said variable with phi instructions. If this does not work as well, the monitor will shadow
   //the variable in the stack of the function being instrumented
   if(!ValidDef){
-    ValidDef = extendLiveRange(Trace, InsBlock, Builder);
+    ValidDef = ExtendLiveRange(Trace, InsBlock, Builder);
     if(!ValidDef)
-      ValidDef = shadowInStack(Trace, ShadowVars, Builder);
+      ValidDef = ShadowInStack(Trace, ShadowVars, Builder);
   }
   
   return ValidDef;
 }
 
-void MemoryMonitor::createInspectionPoint(Value* OutputFilePtr, Value* CallCounter, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
+void MemoryMonitor::CreateInspectionPoint(Value* OutputFilePtr, Value* CallCounter, std::map<std::string, AllocaInst*>*ShadowVars, IRBuilder<> Builder){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(dbgs() << "Creating inspection point\n";);
   #undef DEBUG_TYPE
@@ -1353,7 +1336,7 @@ void MemoryMonitor::createInspectionPoint(Value* OutputFilePtr, Value* CallCount
     LLVM_DEBUG(dbgs() << "Inspecting variable " << Var->getName() <<"\n";);
     #undef DEBUG_TYPE
     
-    inspectVariable(Var, VarType, getValidDef(v.second.second, Builder.GetInsertBlock(), ShadowVars, Builder), OutputFilePtr, CallCounter, Builder);
+    InspectVariable(Var, VarType, GetValidDef(v.second.second, Builder.GetInsertBlock(), ShadowVars, Builder), OutputFilePtr, CallCounter, Builder);
   }
   
   //Inspect the static variables
@@ -1386,13 +1369,13 @@ void MemoryMonitor::createInspectionPoint(Value* OutputFilePtr, Value* CallCount
     LLVM_DEBUG(dbgs() << "Inspecting variable " << Var->getName() << " (Static)\n";);
     #undef DEBUG_TYPE
     
-    inspectVariable(Var, VarType, g.second.second, OutputFilePtr, CallCounter, Builder);
+    InspectVariable(Var, VarType, g.second.second, OutputFilePtr, CallCounter, Builder);
   }
   
   this->FirstInspection = false;
 }
 
-void MemoryMonitor::updateStackMap(DbgVariableIntrinsic* DVI){
+void MemoryMonitor::UpdateStackMap(DbgVariableIntrinsic* DVI){
   //Whiro inspects only variables in the local scope of the function
   if(DVI->getVariable()->getScope()->getName() != DVI->getFunction()->getName())
     return;
@@ -1429,7 +1412,7 @@ void MemoryMonitor::updateStackMap(DbgVariableIntrinsic* DVI){
   }
 }
 
-Instruction* MemoryMonitor::getInsertionPoint(Function& F){
+Instruction* MemoryMonitor::GetInsertionPoint(Function& F){
   //The inspection points are createad right before the return of the function. We find return basic block
   //of the function and set it as the insertion point of the IRBuilder.
   //We use -mergereturn to ensure that every function will have only one exit point
@@ -1455,7 +1438,7 @@ Instruction* MemoryMonitor::getInsertionPoint(Function& F){
     return InsBlock->getTerminator();
 }
 
-void MemoryMonitor::instrumentFunction(Function& F){
+void MemoryMonitor::InstrumentFunction(Function& F){
   #define DEBUG_TYPE "memon"
   LLVM_DEBUG(dbgs() << "Instrumenting function " << F.getName() << ". File: " << F.getSubprogram()->getFile()->getFilename() << "\n";);
   #undef DEBUG_TYPE
@@ -1465,7 +1448,7 @@ void MemoryMonitor::instrumentFunction(Function& F){
   llvm::IRBuilder<> Builder(&F.getEntryBlock(), F.getEntryBlock().getFirstNonPHI()->getIterator());
   
   //Create the function call counter
-  llvm::Value* CallCounter = (F.getName().equals("main")) ? ConstantInt::get(Builder.getInt32Ty(), 1) : createFunctionCounter(&F, Builder);
+  llvm::Value* CallCounter = (F.getName().equals("main")) ? ConstantInt::get(Builder.getInt32Ty(), 1) : CreateFunctionCounter(&F, Builder);
   
   //A map containing all the variables gathered in the function, mapped by their names plus a map containing all the variables shadowed in the stack
   std::map<std::string, std::pair<DIVariable*, std::vector<DbgVariableIntrinsic*>>>StackMap;
@@ -1475,7 +1458,7 @@ void MemoryMonitor::instrumentFunction(Function& F){
   for(Instruction &I : instructions(F)){
     if(DbgVariableIntrinsic* DVI = dyn_cast<DbgVariableIntrinsic>(&I)){
       if(DVI->getVariable()->getScope() == F.getSubprogram())
-        updateStackMap(DVI);
+        UpdateStackMap(DVI);
     }
     
     if(CallInst* CI = dyn_cast<CallInst>(&I)){
@@ -1486,7 +1469,7 @@ void MemoryMonitor::instrumentFunction(Function& F){
       if(CalledFunction->isDeclaration()){
         StringRef FuncName = CalledFunction->getName();
         if(FuncName.equals("malloc") || FuncName.equals("realloc") || FuncName.equals("calloc") || FuncName.equals("free"))
-          handleHeapOperation(CI, Builder);
+          HandleHeapOperation(CI, Builder);
         //Whiro creates inspection points right before halting functions execute
         else if(FuncName.equals("exit")){
           if(OnlyMain){
@@ -1494,16 +1477,16 @@ void MemoryMonitor::instrumentFunction(Function& F){
              Builder.SetInsertPoint(&I);
              //Create a reference to the output file.
              Value* OutputFilePtr = Builder.CreateLoad(this->OutputFile);
-             createInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
-             closeOutputFile(OutputFilePtr, Builder);
+             CreateInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
+             CloseOutputFile(OutputFilePtr, Builder);
            }
           }
           else{
             Builder.SetInsertPoint(&I);
             //Create a reference to the output file.
             Value* OutputFilePtr = Builder.CreateLoad(this->OutputFile);
-            createInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
-            closeOutputFile(OutputFilePtr, Builder);
+            CreateInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
+            CloseOutputFile(OutputFilePtr, Builder);
           }
         }
       }
@@ -1511,7 +1494,7 @@ void MemoryMonitor::instrumentFunction(Function& F){
   }
   
   //Select the program point to create the inspection point for this function
-  Instruction* InsPoint = getInsertionPoint(F);
+  Instruction* InsPoint = GetInsertionPoint(F);
   if(!InsPoint){
     errs() << "Whiro could not find the return block of this function. Skipping it.\n";
     this->CurrentStackMap.clear(); 
@@ -1524,23 +1507,23 @@ void MemoryMonitor::instrumentFunction(Function& F){
   //Creating inspection point  
   if(OnlyMain){
     if(F.getName() == "main")
-      createInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
+      CreateInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
   }
   else
-    createInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
+    CreateInspectionPoint(OutputFilePtr, CallCounter, &ShadowVars, Builder);
   
   //If this is the main routine, close the output file. Notice that in case of calls to halting functions,
   //we also close the file right before the halting
   if(F.getName() == "main")
-    closeOutputFile(OutputFilePtr, Builder);
+    CloseOutputFile(OutputFilePtr, Builder);
   
   if(InsFullHeap)
-    inspectEntireHeap(OutputFilePtr, F.getName(), CallCounter, Builder);
+    InspectEntireHeap(OutputFilePtr, F.getName(), CallCounter, Builder);
   
   this->CurrentStackMap.clear();
 }
 
-void MemoryMonitor::instrumentOnlyHeap(Function& F){
+void MemoryMonitor::InstrumentOnlyHeap(Function& F){
   //Create and set the IRBuilder which instruments the program.
   llvm::IRBuilder<> Builder(&F.getEntryBlock(), F.getEntryBlock().getFirstNonPHI()->getIterator());
   for(Instruction &I : instructions(F)){
@@ -1552,7 +1535,7 @@ void MemoryMonitor::instrumentOnlyHeap(Function& F){
       if(CalledFunction->isDeclaration()){
         StringRef FuncName = CalledFunction->getName();
         if(FuncName.equals("malloc") || FuncName.equals("realloc") || FuncName.equals("calloc") || FuncName.equals("free"))
-          handleHeapOperation(CI, Builder);
+          HandleHeapOperation(CI, Builder);
       }
     }
   }
@@ -1615,11 +1598,11 @@ bool MemoryMonitor::runOnModule(Module &M){
   }
   
   //Create the output file.
-  openOutputFile(Builder);
+  OpenOutputFile(Builder);
   
   //Open the Type Table
-  std::pair<std::string, int> TypeTableMD = createTypeTable();
-  openTypeTable(TypeTableMD.first, TypeTableMD.second, Builder);
+  std::pair<std::string, int> TypeTableMD = CreateTypeTable();
+  OpenTypeTable(TypeTableMD.first, TypeTableMD.second, Builder);
   
   //Instrument the functions in the program
   for(Function &F : M){
@@ -1628,12 +1611,12 @@ bool MemoryMonitor::runOnModule(Module &M){
       //function inspection granularity.
       if(TrackPtr || InsFullHeap){
         if(!F.isDeclaration())
-          instrumentOnlyHeap(F);
+          InstrumentOnlyHeap(F);
       }
       continue;
     }
     if(!F.isDeclaration())
-      instrumentFunction(F);
+      InstrumentFunction(F);
     
     this->FirstInspection = true;
   }

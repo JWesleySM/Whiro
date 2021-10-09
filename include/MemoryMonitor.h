@@ -54,7 +54,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * if it is possible to retrieve it.
 		 * @param I is the LLVM instruction to recover the code location
 		 */
-		std::string getSourceLine(llvm::Instruction* I);
+		std::string GetSourceLine(llvm::Instruction* I);
 		
 		/** 
 		 * This method inserts in the program a call instruction to any function
@@ -66,7 +66,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param IsVarArg tells whether the function to be called has a variable number of arguments
 		 * @return the call instruction
 		 */
-		llvm::CallInst* insertFunctionCall(std::string FuncName, llvm::Type* ReturnType, std::vector<llvm::Type*>ArgsType, std::vector<llvm::Value*>Args, llvm::IRBuilder<> Builder, bool IsVarArg);
+		llvm::CallInst* InsertFunctionCall(std::string FuncName, llvm::Type* ReturnType, std::vector<llvm::Type*>ArgsType, std::vector<llvm::Value*>Args, llvm::IRBuilder<> Builder, bool IsVarArg);
 		
 		/** 
 		 * This method inserts the instructions to open the output file. This method creates the output
@@ -74,7 +74,7 @@ class MemoryMonitor : public llvm::ModulePass {
      * file.
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */ 
-		void openOutputFile(llvm::IRBuilder<> Builder);
+		void OpenOutputFile(llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inserts the instructions to close the output file. It calls the standard C
@@ -82,35 +82,35 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param OutputFilePtr is a pointer to the output file
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void closeOutputFile(llvm::Value* OutputFilePtr, llvm::IRBuilder<> Builder);
+		void CloseOutputFile(llvm::Value* OutputFilePtr, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method states whether the monitor should create a type descriptor for a given debug type.
 		 * Subroutine types and members/pointers to members to struct fields do not have descriptors
 		 * @param DIT is an LLVM debug type
 		 */
-		bool shouldProcessType(llvm::DIType *DIT);
+		bool ShouldProcessType(llvm::DIType *DIT);
 		
 		/**
 		 * This method returns an integer corresponding to the format of a debug type, for reporting purposes.
 		 * @param DIT is an LLVM debug type
 		 * @return the type format of DIT
 		 */
-		int getTypeFormat(llvm::DIType* T);
+		int GetTypeFormat(llvm::DIType* T);
 		
 		/**
 		 * This method returns the complete name of a debug type.
 		 * @param DIT is an LLVM debug type
 		 * @return the complete name of DIT
 		 */
-		std::string makeTypeName(llvm::DIType* DIT);
+		std::string MakeTypeName(llvm::DIType* DIT);
 		
 		/**
 		 * This method returns the complete name of an IR type.
 		 * @param T is an LLVM IR type
 		 * @return the complete name of T
 		 */
-		std::string makeTypeName(llvm::Type* T);
+		std::string MakeTypeName(llvm::Type* T);
 		
 		/**
 		 * This method serializes an entry for a given type in the Type Table binary file.
@@ -124,7 +124,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Fields is an array containing the description of every field in case of the type is a
 		 * product type (C structs)
 		 */
-		void writeTypeDescriptor(const char* TypeName, int QuantFields, int Format, int Offset, int BaseTypeIndex, FILE* TypeTableFile, int* TypeTableSize, llvm::DINodeArray Fields);
+		void WriteTypeDescriptor(const char* TypeName, int QuantFields, int Format, int Offset, int BaseTypeIndex, FILE* TypeTableFile, int* TypeTableSize, llvm::DINodeArray Fields);
 		
 		/**
 		 * This method creates a type descriptor for a given debug type.
@@ -132,13 +132,13 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param TypeTableFile is a pointer to the Type Table binary file
 		 * @param TypeTableSize holds the size of the Type Table.
 		 */
-		void createTypeDescriptor(llvm::DIType* DIT, FILE* TypeTableFile, int* TypeTableSize);
+		void CreateTypeDescriptor(llvm::DIType* DIT, FILE* TypeTableFile, int* TypeTableSize);
 		
 		/**
 		 * This method creates the Type Table file.
 		 * @return a tuple containing the name and the size of the Type Table
 		 */
-		std::pair<std::string, int> createTypeTable();
+		std::pair<std::string, int> CreateTypeTable();
 		
 		/**
 		 * This method inserts the instructions to open the Type Table file.
@@ -146,7 +146,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Size is the size of the type table (number of types in the source code)
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void openTypeTable(std::string ProgramName, int Size, llvm::IRBuilder<> Builder);
+		void OpenTypeTable(std::string ProgramName, int Size, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method creates a counter for a function in the program and inserts the code to increment
@@ -154,7 +154,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param F is a pointer to the function being instrumented
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		llvm::Value* createFunctionCounter(llvm::Function* F, llvm::IRBuilder<> Builder);
+		llvm::Value* CreateFunctionCounter(llvm::Function* F, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method receives a pointer to any valid type in LLVM IR and casts it to a pointer
@@ -164,7 +164,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 * @return the instruction which casts the pointer
 		 */
-		llvm::Value* castPointerToVoid(llvm::Value* Ptr, llvm::IRBuilder<> Builder);
+		llvm::Value* CastPointerToVoid(llvm::Value* Ptr, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method injects code to insert an entry in the Heap Table.
@@ -174,7 +174,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param ArrayStep is the increment the pointer Ptr, so Whiro can visit all data allocated in that block
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void insertHeapEntry(llvm::Value* HeapPtr, llvm::Type* AllocatedType, llvm::Value* Size, llvm::Value* ArrayStep, llvm::IRBuilder<> Builder);
+		void InsertHeapEntry(llvm::Value* HeapPtr, llvm::Type* AllocatedType, llvm::Value* Size, llvm::Value* ArrayStep, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method injects code to update the size of an entry in the Heap Table.
@@ -182,7 +182,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param NewSize is the size of the heap entry
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void updateHeapEntrySize(llvm::Value* HeapPtr, llvm::Value* NewSize, llvm::IRBuilder<> Builder);
+		void UpdateHeapEntrySize(llvm::Value* HeapPtr, llvm::Value* NewSize, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method injects code to 'delete' an entry in the Heap Table. Whiro actually marks it as unreachable
@@ -190,7 +190,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param HeapPtr is a pointer to an heap address
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void deleteHeapEntry(llvm::Value* HeapPtr, llvm::IRBuilder<> Builder);
+		void DeleteHeapEntry(llvm::Value* HeapPtr, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inserts code to update the Heap Table according to the type of a heap operation.
@@ -198,7 +198,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param HeapOP is an LLVM instruction that operates in the heap
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void handleHeapOperation(llvm::CallInst* HeapOp, llvm::IRBuilder<> Builder);
+		void HandleHeapOperation(llvm::CallInst* HeapOp, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method get the format specifier to be used to print a variable with that type in 
@@ -208,14 +208,14 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @return the a string containing the format specifier used to print a variable of 
 		 * the given type
 			*/
-		std::string getFormatSpecifier(llvm::DIType* VarType);
+		std::string GetFormatSpecifier(llvm::DIType* VarType);
 		
 		/**
 		 * This method returns the index to the descriptor of an IR type
 		 * @param T is an LLVM IR type
 		 * @return the index to access the descriptor of T in the Type Table
 			*/
-		int getTypeIndex(llvm::Type* T);
+		int GetTypeIndex(llvm::Type* T);
 		
 		/**
 		 * This method inserts code to inspect variables of scalar types. We use the standard fprint function to 
@@ -227,7 +227,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 * @param Scalarized indicates whether this variable is an array or struct value scalarized by some optimization
 		 */
-		void inspectScalar(llvm::DIVariable* Scalar, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter,  llvm::IRBuilder<> Builder, bool Scalarized);
+		void InspectScalar(llvm::DIVariable* Scalar, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter,  llvm::IRBuilder<> Builder, bool Scalarized);
 		
 		/**
 		 * This method inserts code to inspect pointer variables.
@@ -237,7 +237,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void inspectPointer(llvm::DIVariable* Pointer, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
+		void InspectPointer(llvm::DIVariable* Pointer, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inserts code to inspect union variables.
@@ -247,7 +247,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void inspectUnion(llvm::DIVariable* Union, llvm::Value* ValidDef, llvm::DICompositeType* UnionType, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
+		void InspectUnion(llvm::DIVariable* Union, llvm::Value* ValidDef, llvm::DICompositeType* UnionType, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inserts code to inspect struct variables.
@@ -259,7 +259,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void inspectStruct(llvm::DIVariable* Struct, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
+		void InspectStruct(llvm::DIVariable* Struct, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inserts code to inspect array variables. We insert code to compute a hashcode and print said
@@ -272,7 +272,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void inspectArray(llvm::DIVariable* Array, llvm::Value* ValidDef, llvm::DICompositeType* ArrayType, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
+		void InspectArray(llvm::DIVariable* Array, llvm::Value* ValidDef, llvm::DICompositeType* ArrayType, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method inspect and decide how to report the value of a variable based on its type.
@@ -283,7 +283,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void inspectVariable(llvm::DIVariable* Var, llvm::DIType* VarType, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);	
+		void InspectVariable(llvm::DIVariable* Var, llvm::DIType* VarType, llvm::Value* ValidDef, llvm::Value* OutputFilePtr, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);	
 		 
 		 /**
 		 * This method inserts code to call the function that will report all heap-allocated data in the program at
@@ -293,7 +293,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param CallCounter is the LLVM value corresponding to the function counter 
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */  
-	  void inspectEntireHeap(llvm::Value* OutputFilePtr, llvm::StringRef FuncName, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
+	  void InspectEntireHeap(llvm::Value* OutputFilePtr, llvm::StringRef FuncName, llvm::Value* CallCounter, llvm::IRBuilder<> Builder);
 	  
 	  /**
 		 * This method returns the largest IR type found among the SSA definitions in the trace of a variable. By largest, 
@@ -301,7 +301,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Trace is the trace with the definitions of a variable
 		 * @return the largest type in Trace
 		 */
-		llvm::Type* getLargestType(std::vector<llvm::DbgVariableIntrinsic*>Trace);
+		llvm::Type* GetLargestType(std::vector<llvm::DbgVariableIntrinsic*>Trace);
 		
 		/**
 		 * This method shadows a variable in the stack of the function currently being instrumented. It allocates
@@ -312,7 +312,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 * @return the shadow slot allocated
 		 */
-		llvm::AllocaInst* shadowInStack(std::vector<llvm::DbgVariableIntrinsic*>Trace, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
+		llvm::AllocaInst* ShadowInStack(std::vector<llvm::DbgVariableIntrinsic*>Trace, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method extends the live range of a variable by inserting a Phi-instruction with the definitions
@@ -322,7 +322,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 * @return the phi instruction created
 		 */
-		llvm::PHINode* extendLiveRange(std::vector<llvm::DbgVariableIntrinsic*>Trace, llvm::BasicBlock* InsBlock, llvm::IRBuilder<> Builder);
+		llvm::PHINode* ExtendLiveRange(std::vector<llvm::DbgVariableIntrinsic*>Trace, llvm::BasicBlock* InsBlock, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method selects which definition of a variable is valid at an inspection point
@@ -332,7 +332,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 * @return the valid definition of the variable
 		 */
-		llvm::Value* getValidDef(std::vector<llvm::DbgVariableIntrinsic*>Trace, llvm::BasicBlock* InsBlock, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
+		llvm::Value* GetValidDef(std::vector<llvm::DbgVariableIntrinsic*>Trace, llvm::BasicBlock* InsBlock, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method creates an inspection point in a function. It decides which variables will be inspected based on
@@ -343,7 +343,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param ShadowVars is a map of variables that were shadowed in the stack
 		 * @param Builder is the LLVM IR builder, to insert instructions and get types
 		 */
-		void createInspectionPoint(llvm::Value* OutputFilePtr, llvm::Value* CallCounter, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
+		void CreateInspectionPoint(llvm::Value* OutputFilePtr, llvm::Value* CallCounter, std::map<std::string, llvm::AllocaInst*>*ShadowVars, llvm::IRBuilder<> Builder);
 		
 		/**
 		 * This method handles a LLVM debug intrinsic. Said intrinsic describes either the address of a local
@@ -351,7 +351,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * the Trace of a variable.
 		 * @param DVI is a LLVM debug variable intrinsic (llvm.dbg.declare or llvm.dbg.value)
 		 */
-		void updateStackMap(llvm::DbgVariableIntrinsic* DVI);
+		void UpdateStackMap(llvm::DbgVariableIntrinsic* DVI);
 		
 		/**
 		 * This method selects the point where inspection point will be created. In the current version, Whiro
@@ -361,7 +361,7 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * @param F is the function being instrumented
 		 * @return an instruction from the return block of F. Inspection points will be created right before it
 		 */
-		llvm::Instruction* getInsertionPoint(llvm::Function& F);
+		llvm::Instruction* GetInsertionPoint(llvm::Function& F);
 		
 		/**
 		 * This method inserts all the instrumentation in a function. It creates the call counter, inserts code to
@@ -369,14 +369,14 @@ class MemoryMonitor : public llvm::ModulePass {
 		 * state at inspection points
 		 * @param F is the function to be instrumented
 		 */
-		void instrumentFunction(llvm::Function& F);
+		void InstrumentFunction(llvm::Function& F);
 		
 		/**
 		 * This method instrumentats a function, but only inserts code to update the Heap Table. It is useful when
 		 * the user chooses to inspect only the main routine of the program, but it wants to use the Precise mode
 		 * @param F is the function to be instrumented
 		 */
-		void instrumentOnlyHeap(llvm::Function& F);
+		void InstrumentOnlyHeap(llvm::Function& F);
 		
     
  };

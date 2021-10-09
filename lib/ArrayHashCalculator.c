@@ -1,6 +1,6 @@
 #include "../include/Whiro.h"
 
-char* getArrayIndexAsString(int Index){
+char* WhiroGetArrayIndexAsString(int Index){
 	int QuantDigits = 0, Num = Index;
 	while(Num !=0){
 		QuantDigits++;
@@ -11,7 +11,7 @@ char* getArrayIndexAsString(int Index){
 	return IndexString;
 }
 
-int computeHashcode1D(void* Array, int Size, int Format){
+int WhiroComputeHashcode1D(void* Array, int Size, int Format){
   //Traverse an array of 1 dimension and compute a hashcode value
   int Hashcode = 1;
   for(int i = 0; i < Size; i++){
@@ -69,57 +69,57 @@ int computeHashcode1D(void* Array, int Size, int Format){
   return Hashcode;
 }
 
-int computeHashcode(void* Array, int TotalElements, int Step, int Format){
+int WhiroComputeHashcode(void* Array, int TotalElements, int Step, int Format){
   //Traverse an array with N dimensions and compute a hashcode value for it
   int Hashcode = 0;
   for(int i = 0; i < TotalElements; i += Step){
     switch(Format){
       case 1:
-        Hashcode += computeHashcode1D((double*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((double*)Array + i, Step, Format);
         break;
       
       case 2:
-        Hashcode += computeHashcode1D((float*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((float*)Array + i, Step, Format);
         break;
       
       case 3:
-        Hashcode += computeHashcode1D((short*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((short*)Array + i, Step, Format);
         break;
       
       case 4:
-        Hashcode += computeHashcode1D((long*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((long*)Array + i, Step, Format);
         break;
         
       case 5:
-        Hashcode += computeHashcode1D((long long*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((long long*)Array + i, Step, Format);
         break;
       
       case 6:
-        Hashcode += computeHashcode1D((int*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((int*)Array + i, Step, Format);
         break;
       
       case 7:
-        Hashcode += computeHashcode1D((char*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((char*)Array + i, Step, Format);
         break;
       
       case 8:
-        Hashcode += computeHashcode1D((unsigned char*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((unsigned char*)Array + i, Step, Format);
         break;
         
       case 9:
-        Hashcode += computeHashcode1D((unsigned short*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((unsigned short*)Array + i, Step, Format);
         break;
       
       case 10:
-        Hashcode += computeHashcode1D((unsigned long*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((unsigned long*)Array + i, Step, Format);
         break;
       
       case 11:
-        Hashcode += computeHashcode1D((unsigned long long*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((unsigned long long*)Array + i, Step, Format);
         break;
       
       case 12:
-        Hashcode += computeHashcode1D((unsigned int*)Array + i, Step, Format);
+        Hashcode += WhiroComputeHashcode1D((unsigned int*)Array + i, Step, Format);
         break;
         
       default:

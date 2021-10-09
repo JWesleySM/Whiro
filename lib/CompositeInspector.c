@@ -8,7 +8,7 @@ int MemFilter, InsHeap, InsStack, Precise;
 //Executable and Linkable Format (ELF) program segments
 extern char etext, edata, end; 
 
-void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* Name, char* FuncName, int CallCounter){
+void WhiroInspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* Name, char* FuncName, int CallCounter){
   char* DataNameFull = NULL;
   for(int i = 0; i < DataType->QuantFields; i++){
     //We use the DataNameFull to append the names of the data while reporting
@@ -80,7 +80,7 @@ void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* N
 			case 13:{
 				if(Precise){
 				  void** Next = (Data + DataType->Fields[i].Offset);
-				  trackPointer(OutputFile, *Next, DataType->Fields[i].BaseTypeIndex, DataNameFull, FuncName, CallCounter);
+				  WhiroTrackPointer(OutputFile, *Next, DataType->Fields[i].BaseTypeIndex, DataNameFull, FuncName, CallCounter);
 				}
 				else
 				  fprintf(OutputFile, "%s %s %d : pointer to %s\n", Name, FuncName, CallCounter, TypeTable[DataType->Fields[i].BaseTypeIndex].Name);
@@ -93,18 +93,18 @@ void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* N
 				
 			case 15:{
 			  TypeDescriptor ElementType = TypeTable[DataType->Fields[i].BaseTypeIndex];
-			  int Hashcode = computeHashcode((Data + DataType->Fields[i].Offset), ElementType.Fields[0].Offset, ElementType.Fields[0].Offset, ElementType.Fields[0].Format);
+			  int Hashcode = WhiroComputeHashcode((Data + DataType->Fields[i].Offset), ElementType.Fields[0].Offset, ElementType.Fields[0].Offset, ElementType.Fields[0].Format);
 			  fprintf(OutputFile, "%s %s %d : %d\n", DataNameFull, FuncName, CallCounter, Hashcode);
 			  break;
 			}
 			
 			case 16:
-			  inspectUnion(OutputFile, (char*)Data, DataType->Fields[i].Offset, Name, FuncName, CallCounter);
+			  WhiroInspectUnion(OutputFile, (char*)Data, DataType->Fields[i].Offset, Name, FuncName, CallCounter);
 			  break;
 			  
 			case 17:{
 			  TypeDescriptor StructType = TypeTable[DataType->Fields[i].BaseTypeIndex];
-			  inspectData(OutputFile, (Data + DataType->Fields[i].Offset), &StructType, Name, FuncName, CallCounter);
+			  WhiroInspectData(OutputFile, (Data + DataType->Fields[i].Offset), &StructType, Name, FuncName, CallCounter);
 			  break;
 			}
 			  
@@ -122,11 +122,11 @@ void inspectData(FILE* OutputFile, void* Data, TypeDescriptor* DataType, char* N
 	}
 }
 
-void inspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter){
+void WhiroInspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter){
   if(Precise){
-    trackPointer(OutputFile, Ptr, TypeIndex, Name, FuncName, CallCounter);
+    WhiroTrackPointer(OutputFile, Ptr, TypeIndex, Name, FuncName, CallCounter);
     //After we traverse the table, set all of its nodes as unvisited.
-    setAllHeapUnivisited();
+    WhiroSetAllHeapUnivisited();
     return;	
   }
   else{
@@ -134,7 +134,7 @@ void inspectPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char
   }
 }
 
-void trackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter){
+void WhiroTrackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* FuncName, int CallCounter){
   HeapEntry* Entry;
 	HASH_FIND(hh, HeapTable, &Ptr, sizeof(void*), Entry);
 	//If this pointer is pointing to the heap, we inspect if the user chose to inspect the heap
@@ -142,7 +142,7 @@ void trackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* 
 	  if(MemFilter && !InsHeap)
 	    return;
 
-	  inspectHeapData(OutputFile, Entry, Name, FuncName, CallCounter, 1);
+	  WhiroInspectHeapData(OutputFile, Entry, Name, FuncName, CallCounter, 1);
   }
   else if(Ptr){
     //If this pointer is not null and is not pointing to a heap address, then we assume it is pointing to the stack
@@ -155,14 +155,14 @@ void trackPointer(FILE* OutputFile, void* Ptr, int TypeIndex, char* Name, char* 
     if((char*)Ptr < &etext)
       return;
     
-	  inspectData(OutputFile, Ptr, &TypeTable[TypeIndex], Name, FuncName, CallCounter);
+	  WhiroInspectData(OutputFile, Ptr, &TypeTable[TypeIndex], Name, FuncName, CallCounter);
 	}
 	else
 	  //Print the pointer as NULL if it is equal to zero
 	  fprintf(OutputFile, "%s %s %d : NULL\n", Name, FuncName, CallCounter);	
 }
 
-void inspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* FuncName, int CallCounter){
+void WhiroInspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* FuncName, int CallCounter){
   fprintf(OutputFile, "%s %s %d : ", Name, FuncName, CallCounter);
   for(size_t i = 0; i < Size; i++){
     fprintf(OutputFile, "%d", (int)Union[i]);  
@@ -170,7 +170,7 @@ void inspectUnion(FILE* OutputFile, char* Union, size_t Size, char* Name, char* 
   fprintf(OutputFile, "\n");
 }
 
-void inspectStruct(FILE* OutputFile, void* Struct, int TypeIndex, char* Name, char* FuncName, int CallCounter){
-	inspectData(OutputFile, Struct, &TypeTable[TypeIndex], Name, FuncName, CallCounter);	
+void WhiroInspectStruct(FILE* OutputFile, void* Struct, int TypeIndex, char* Name, char* FuncName, int CallCounter){
+	WhiroInspectData(OutputFile, Struct, &TypeTable[TypeIndex], Name, FuncName, CallCounter);	
 }
 

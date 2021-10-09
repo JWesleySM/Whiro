@@ -3,7 +3,7 @@
 TypeDescriptor* TypeTable = NULL;
 extern int InsHeap, InsStack, MemFilter, Precise;
 
-void openTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, int InsStackArg, int PreciseArg){
+void WhiroOpenTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, int InsStackArg, int PreciseArg){
   //Set the usage mode settings  
   InsHeap = InsHeapArg;
   InsStack = InsStackArg;
@@ -42,7 +42,7 @@ void openTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, int I
   //exit(1);*/
 }
 
-int isScalarType(int Format){
+int WhiroIsScalarType(int Format){
   return (Format > 0 && Format <= 12) ? 1 : 0;
 }
 

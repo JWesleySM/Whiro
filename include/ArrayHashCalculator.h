@@ -9,7 +9,7 @@
  * @param Index is the index of the array.
  * @return the string corresponding to that array index.
  */
-char* getArrayIndexAsString(int Index);
+char* WhiroGetArrayIndexAsString(int Index);
 
 /**
  * This method computes the hashcode for a 1D array.
@@ -18,7 +18,7 @@ char* getArrayIndexAsString(int Index);
  * @param Format is the type of the elements of the array.
  * @return the hashcode.
  */
-int computeHashcode1D(void* Array, int Size, int Format);
+int WhiroComputeHashcode1D(void* Array, int Size, int Format);
 
 /**
  * This method computes the hashcode for a ND array. It traverses the array in a
@@ -30,6 +30,6 @@ int computeHashcode1D(void* Array, int Size, int Format);
  * @param Total_Elements is the amout of elements of the array.
  * @return the hashcode computed for this array.
  */
-int computeHashcode(void* Array, int TotalElements, int Step, int Format);
+int WhiroComputeHashcode(void* Array, int TotalElements, int Step, int Format);
 
 #endif

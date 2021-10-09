@@ -38,13 +38,13 @@ typedef struct TypeDescriptor{
  * @param InsStackArg is true if the values store in the stack are to be inspected
  * @param PreciseArg is true for the Precise mode and false for Fast
  */
-void openTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, int InsStackArg, int PreciseArg);
+void WhiroOpenTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, int InsStackArg, int PreciseArg);
 
 /** 
  * This method identifies if a given format corresponds to a scalar type
  * @param Format is an integer corresponding to the format specifier of a type
  * @return true if this is a scalar type and false otherwise
  */
-int isScalarType(int Format);
+int WhiroIsScalarType(int Format);
 
 #endif

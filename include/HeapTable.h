@@ -40,7 +40,7 @@ typedef struct {
  * allocated in that block
  * @param TypeIndex is the type to access the type descriptor of that data
  */
-void insertHeapEntry(void* Block, int ArraySize, int ArrayPtrStep, int TypeIndex);
+void WhiroInsertHeapEntry(void* Block, int ArraySize, int ArrayPtrStep, int TypeIndex);
 
 
 /**
@@ -49,14 +49,14 @@ void insertHeapEntry(void* Block, int ArraySize, int ArrayPtrStep, int TypeIndex
  * @param Block is the heap address
  * @param NewSize is the new size of the entry
  */
-void updateHeapEntrySize(void* Block, int NewSize);
+void WhiroUpdateHeapEntrySize(void* Block, int NewSize);
 
 /**
  * This function sets the heap entry addressed by Block to unreachable, if such entry
  * exists in the table
  * @param Block is the heap address
  */
-void deleteHeapEntry(void* Block);
+void WhiroDeleteHeapEntry(void* Block);
 
 /**
  * This function takes an entry from the heap table and report the data contained in
@@ -74,7 +74,7 @@ void deleteHeapEntry(void* Block);
  * @param FollowPtr indicates whether Whiro should follow the chain of reachability of
  * this data in case it points to somewhere in memory
 */
-void inspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter, int FollowPtr);
+void WhiroInspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter, int FollowPtr);
 
 /**
  * This function reports an entry from the heap table that has a size greater than 1. 
@@ -87,7 +87,7 @@ void inspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* Fu
  * inspected
  * @param CallCounter is the current value of FuncName
  */
-void inspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter);
+void WhiroInspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter);
 
 /**
  * This function reports all the contents of the Heap Table, that is, all the heap-
@@ -97,11 +97,11 @@ void inspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* F
  * inspected
  * @param CallCounter is the current value of FuncName
  */
-void inspectEntireHeap(FILE* OutputFile, char* FuncName, int CallCounter);
+void WhiroInspectEntireHeap(FILE* OutputFile, char* FuncName, int CallCounter);
 
 /**
  * This function sets the entire heap table as univisited. Whiro uses it to report aliases.
  */
-void setAllHeapUnivisited();
+void WhiroSetAllHeapUnivisited();
 
 #endif

@@ -3,7 +3,7 @@
 HeapEntry* HeapTable = NULL;
 extern TypeDescriptor* TypeTable;
 
-void printTable(){
+void WhiroPrintTable(){
   HeapEntry *Entry;
 	for(Entry = HeapTable; Entry != NULL; Entry = Entry->hh.next)
 	  printf("%p ", Entry->Key);
@@ -11,7 +11,7 @@ void printTable(){
 	printf("\n");
 }
 
-void insertHeapEntry(void* Block, int Size, int ArrayStep, int TypeIndex){
+void WhiroInsertHeapEntry(void* Block, int Size, int ArrayStep, int TypeIndex){
   HeapEntry* Entry;
   //Insert a new entry in the Heap Table
   //If we do not find an entry in the table for this pointers, we create one.
@@ -29,7 +29,7 @@ void insertHeapEntry(void* Block, int Size, int ArrayStep, int TypeIndex){
   HASH_ADD(hh, HeapTable, Key, sizeof(void*), Entry);
 }
 
-void updateHeapEntrySize(void* Block, int NewSize){
+void WhiroUpdateHeapEntrySize(void* Block, int NewSize){
   //Update the size of an entry in the Heap Table
   HeapEntry* Entry;
 	HASH_FIND(hh, HeapTable, &Block, sizeof(void*), Entry);
@@ -39,7 +39,7 @@ void updateHeapEntrySize(void* Block, int NewSize){
 	}
 }
 
-void deleteHeapEntry(void* Block){
+void WhiroDeleteHeapEntry(void* Block){
   //Set a heap entry as unreachable data
 	HeapEntry* Entry;
 	HASH_FIND(hh, HeapTable, &Block, sizeof(void*), Entry);
@@ -50,7 +50,7 @@ void deleteHeapEntry(void* Block){
 	}
 }
 
-void inspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter, int FollowPtr){
+void WhiroInspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter, int FollowPtr){
   //If this entry was already visited, do not print it again.
 	//Otherwise, set is as visited.
 	if(Entry->Visited == 1)
@@ -65,30 +65,30 @@ void inspectHeapData(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* Fu
 	}
 	
 	if(Entry->Data->Size > 1){
-	  inspectHeapArray(OutputFile, Entry, PtrName, FuncName, CallCounter);
+	  WhiroInspectHeapArray(OutputFile, Entry, PtrName, FuncName, CallCounter);
 		return;
 	}
 	else
-	  inspectData(OutputFile, Entry->Key, &TypeTable[Entry->Data->TypeIndex], PtrName, FuncName, CallCounter);
+	  WhiroInspectData(OutputFile, Entry->Key, &TypeTable[Entry->Data->TypeIndex], PtrName, FuncName, CallCounter);
 }
 
-void inspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter){
+void WhiroInspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* FuncName, int CallCounter){
   //Inspect an array allocated in the heap
   TypeDescriptor Type = TypeTable[Entry->Data->TypeIndex];
-  if(isScalarType(Type.Fields[0].Format)){
+  if(WhiroIsScalarType(Type.Fields[0].Format)){
     //If it is a scalar, compute a hashcode value
-	  int Hashcode = computeHashcode(Entry->Key, Entry->Data->Size, Entry->Data->ArrayStep, Type.Fields[0].Format);
+	  int Hashcode = WhiroComputeHashcode(Entry->Key, Entry->Data->Size, Entry->Data->ArrayStep, Type.Fields[0].Format);
 	  fprintf(OutputFile, "%s %s %d: %d\n", PtrName, FuncName, CallCounter, Hashcode);
 	}
   else if(Type.Fields[0].Format == 13){
     //If it is an array of pointers, inspect each position
     for(int i = 0; i < Entry->Data->Size; i++){
 			void** Next = (Entry->Key + i);
-			char* DataName = getArrayIndexAsString(i);
+			char* DataName = WhiroGetArrayIndexAsString(i);
 			char* DataFullName = (char*)malloc(strlen(PtrName) + strlen(DataName) + 1);
 			strcpy(DataFullName, PtrName);
 			strcat(DataFullName, DataName);
-			inspectPointer(OutputFile, *Next, Type.Fields[0].BaseTypeIndex, DataFullName, FuncName, CallCounter);
+			WhiroInspectPointer(OutputFile, *Next, Type.Fields[0].BaseTypeIndex, DataFullName, FuncName, CallCounter);
 			free(DataFullName);
 		}
    }
@@ -98,18 +98,18 @@ void inspectHeapArray(FILE* OutputFile, HeapEntry* Entry, char* PtrName, char* F
    } 
 }
 
-void inspectEntireHeap(FILE* OutputFile, char* FuncName, int CallCounter){
+void WhiroInspectEntireHeap(FILE* OutputFile, char* FuncName, int CallCounter){
   //Report all the heap-allocated data
   HeapEntry* Entry;
   for(Entry = HeapTable; Entry != NULL; Entry = Entry->hh.next){
     if(Entry->Free == 0)
-      inspectHeapData(OutputFile, Entry, "Heap Data", FuncName, CallCounter, 0);
+      WhiroInspectHeapData(OutputFile, Entry, "Heap Data", FuncName, CallCounter, 0);
   }
   
-  setAllHeapUnivisited();
+  WhiroSetAllHeapUnivisited();
 }
 
-void setAllHeapUnivisited(){
+void WhiroSetAllHeapUnivisited(){
 	HeapEntry *Entry;
 	for(Entry = HeapTable; Entry != NULL; Entry = Entry->hh.next)
 		Entry->Visited = 0;
