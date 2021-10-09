@@ -1,0 +1,21 @@
+#temp swap files
+*~
+
+#bitcode files
+*.bc
+*.wbc
+
+#assembly files
+*.s
+
+#type table files
+*.bin
+
+#executable files
+*.out
+
+#testing directories
+build/
+
+#output directories
+Benchmarks/*-Output/
