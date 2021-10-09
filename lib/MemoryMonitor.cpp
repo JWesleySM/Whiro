@@ -793,7 +793,7 @@ void MemoryMonitor::InspectScalar(DIVariable* Scalar, Value* ValidDef, Value* Ou
   //STDOUText is the string which is argument to the fprint function. It contains the name and scope
   //of the variable, plus its format specifier.
   std::string STDOUTText = Scalar->getName().str() + " ";
-  STDOUTText += (isa<DIGlobalVariable>(Scalar)) ? "Static " : Scalar->getScope()->getName().str();
+  STDOUTText += (isa<DIGlobalVariable>(Scalar)) ?  "(Static) " + Builder.GetInsertBlock()->getParent()->getName().str() : Scalar->getScope()->getName().str();
   STDOUTText +=  std::string(" %d"); //To print the call counter value
   
   if(Scalarized)
@@ -842,7 +842,7 @@ void MemoryMonitor::InspectPointer(DIVariable* Pointer, Value* ValidDef, Value* 
   //If this Value is not pointer is not void*, we need to cast it
   ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
-  std::string Scope = (isa<DIGlobalVariable>(Pointer)) ? "Static " : Pointer->getScope()->getName().str();
+  std::string Scope = (isa<DIGlobalVariable>(Pointer)) ? "(Static) " + Builder.GetInsertBlock()->getParent()->getName().str() : Pointer->getScope()->getName().str();
   
   //Uncomment this line to ignore I/O printing time
   //return;
@@ -879,7 +879,7 @@ void MemoryMonitor::InspectUnion(DIVariable* Union, Value* ValidDef, DIComposite
   //If this pointer is not void*, we need to cast it
   ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
-  std::string Scope = (isa<DIGlobalVariable>(Union)) ? "Static " : Union->getScope()->getName().str();  
+  std::string Scope = (isa<DIGlobalVariable>(Union)) ? "(Static) " + Builder.GetInsertBlock()->getParent()->getName().str() : Union->getScope()->getName().str();  
   
    //Uncomment this line to ignore I/O printing time
   //return;
@@ -932,7 +932,7 @@ void MemoryMonitor::InspectStruct(DIVariable* Struct, Value* ValidDef, Value* Ou
   //If this pointer is not void*, we need to cast it
   ValidDef = (ValidDef->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(ValidDef, Builder) : ValidDef;
   
-  std::string Scope = (isa<DIGlobalVariable>(Struct)) ? "Static " : Struct->getScope()->getName().str();
+  std::string Scope = (isa<DIGlobalVariable>(Struct)) ? "(Static) " + Builder.GetInsertBlock()->getParent()->getName().str() : Struct->getScope()->getName().str();
   
   //Uncomment this line to ignore I/O printing time
   //return;  
