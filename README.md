@@ -158,7 +158,7 @@ This is a non-trivial task in C or C++ due to the difficulty to distinguish memo
 We have customized Whiro with the following configurations:
 We track the contents of pointers at every function in the program and considering the Heapmemory allocations.
 
-![alt text](https://github.com/JWesleySM/NewWhiro/blob/main/ProgramVisualization.png "Program Visualization")
+![alt text](https://github.com/JWesleySM/NewWhiro/blob/main/ProgVisualization.png "Program Visualization")
 
 **Results:** The figure above shows heap snapshots produced with our adaptation of Whiro. In (a)  we haave a snapshot showing the two disjoint data structures in MiBench’s
 Patricia, after the first invocation of pat_search returns with the test input. In (b-c) we have the two disjoint graphs in the heap of a program that copies a binary tree into
