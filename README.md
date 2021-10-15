@@ -146,4 +146,22 @@ Whiro computes some statistics during instrumentation that can be viewed using t
 * Number of functions instrumented
 * Number of variables with different SSA types 
 
+### Aplication Example: Program Visualization
+
+One of the applications of Whiro is program visualization
+Tools able to provide graphic representation of the heap are useful for program understanding and debugging. Viewing data structures and other
+program elements in a graphical format makes it easier to analyze the state of memory,
+recognize patterns, and observe the relation between different allocated blocks. 
+We have adapted Whiro to render a visual representation the graph determined by
+relations between pointers in the heap in a program.
+This is a non-trivial task in C or C++ due to the difficulty to distinguish memory addresses from scalar types.
+We have customized Whiro with the following configurations:
+We track the contents of pointers at every function in the program and considering the Heapmemory allocations.
+
+![alt text](https://github.com/JWesleySM/NewWhiro/blob/main/ProgramVisualization.png "Program Visualization")
+
+**Results:** The figure above shows heap snapshots produced with our adaptation of Whiro. In (a)  we haave a snapshot showing the two disjoint data structures in MiBench’s
+Patricia, after the first invocation of pat_search returns with the test input. In (b-c) we have the two disjoint graphs in the heap of a program that copies a binary tree into
+a hash table. Collisions are stored in a linked list. Currently, we can visualize the heap of all the programs in the MiBench collection, for instance. Graphs are produced in DOT format. Users can render them using different graph visualization algorithms.
+
 
