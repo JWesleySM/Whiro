@@ -25,7 +25,7 @@ function usage(){
   echo " -stc: inspect only static-allocated data"
   echo " -hp:  inspect only heap-allocated data"
   echo " -fp:  report the entire heap at every inspection point"
-  echo " -p:   enable Precise instrumentation mode (track the contents pointed by pointer variables)"
+  echo " -pr:   enable Precise instrumentation mode (track the contents pointed by pointer variables)"
   echo " -h:   displays this help"
 }
 
