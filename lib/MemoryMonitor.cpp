@@ -273,6 +273,9 @@ std::string MemoryMonitor::MakeTypeName(DIType* DIT){
       case dwarf::DW_TAG_typedef:
         TypeName = DIDT->getName();
         break;
+        
+      default:
+        break;
     }
   }
   else if(DICompositeType* DICT = dyn_cast<DICompositeType>(DIT)){
@@ -291,6 +294,9 @@ std::string MemoryMonitor::MakeTypeName(DIType* DIT){
         
       case dwarf::DW_TAG_enumeration_type:
         TypeName = "enum " + DICT->getName().str();
+        break;
+      
+      default:
         break;
     }
   }
@@ -444,7 +450,7 @@ void MemoryMonitor::CreateTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* 
       case dwarf::DW_TAG_array_type:{
         //Format = BaseTypeIndex = getTypeFormat(DICT->getBaseType());
         QuantFields = 1;
-        DISubrange::CountType Count = dyn_cast<DISubrange>(DICT->getElements()[0])->getCount();
+        auto Count = dyn_cast<DISubrange>(DICT->getElements()[0])->getCount();
         Offset = Count.get<ConstantInt*>()->getSExtValue(); 
         break;
       }
@@ -462,6 +468,9 @@ void MemoryMonitor::CreateTypeDescriptor(DIType* DIT, FILE* TypeTableFile, int* 
       case dwarf::DW_TAG_enumeration_type:
         QuantFields = 1;
         Offset = 0;
+        break;
+      
+      default:
         break;
     }
   }
@@ -981,7 +990,7 @@ void MemoryMonitor::InspectArray(DIVariable* Array, Value* ValidDef, DIComposite
     TotalElem = ConstantInt::get(Builder.getInt64Ty(), 1);
     for(unsigned i = 0; i < Subranges.size(); i++){
       Value* DimSize = nullptr;
-      DISubrange::CountType Count = dyn_cast<DISubrange>(Subranges[i])->getCount();
+      auto Count = dyn_cast<DISubrange>(Subranges[i])->getCount();
       //If the number of elements in dimension 'i' is given by a constant, it is straightforward to get it.
       //Otherwise, this number is given by a variable and we need to get a final SSA definition for it.
       if(Count.is<ConstantInt*>())
@@ -995,7 +1004,7 @@ void MemoryMonitor::InspectArray(DIVariable* Array, Value* ValidDef, DIComposite
   }
   
   //Get the array step, that is, the size of the outermost dimension
-  DISubrange::CountType Count = dyn_cast<DISubrange>(Subranges[Subranges.size() - 1])->getCount();
+  auto Count = dyn_cast<DISubrange>(Subranges[Subranges.size() - 1])->getCount();
   Value* Step = nullptr;
   if(Count.is<ConstantInt*>())
     Step = Count.get<ConstantInt*>();
