@@ -258,7 +258,7 @@ std::string MemoryMonitor::MakeTypeName(DIType* DIT){
   
   if(!DIT)
     TypeName = "void";
-  if(DIBasicType* DIBT = dyn_cast<DIBasicType>(DIT))
+  else if(DIBasicType* DIBT = dyn_cast<DIBasicType>(DIT))
     TypeName = DIBT->getName().str();
   else if(DIDerivedType* DIDT = dyn_cast<DIDerivedType>(DIT)){
     switch(DIDT->getTag()){

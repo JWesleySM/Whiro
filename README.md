@@ -35,19 +35,19 @@ Currently, the only software necessary to run Whiro is LLVM. If you want to use 
 In order to use Whiro, [download](http://releases.llvm.org) and [build](http://releases.llvm.org/10.0.0/docs/GettingStarted.html) LLVM on your system. To do this, you can follow the instructions in these links, watch this [video](https://youtu.be/l0LI_7KeFtw), or type the set of commands below:
 
 ```
-git clone https://github.com/llvm/llvm-project.git
-cd llvm-project
-mkdir build
-cd build
-cmake -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS=clang -DLLVM_ENABLE_ASSERTIONS=On ../llvm
-cmake --build .
+$ git clone https://github.com/llvm/llvm-project.git
+$ cd llvm-project
+$ mkdir build
+$ cd build
+$ cmake -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS=clang -DLLVM_ENABLE_ASSERTIONS=On ../llvm
+$ make -j4
 ```
 
 **_Important_**: Whiro was developed on the top of LLVM version 10.0.0. Subsequent versions might break the program due to changes in the namespace.  So, right after cloning its repository, you might want to check out the tag to the 10.0 release:
 
 ``` -DLLVM_ENABLE_PROJECTS=clang
-git clone https://github.com/llvm/llvm-project.git
-git checkout llvmorg-10.0.0 
+$ git clone https://github.com/llvm/llvm-project.git
+$ git checkout llvmorg-10.0.0 
 ``` 
 
 ### Building Whiro
