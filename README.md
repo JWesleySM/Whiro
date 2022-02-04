@@ -146,7 +146,7 @@ Whiro computes some statistics during instrumentation that can be viewed using t
 * Number of functions instrumented
 * Number of variables with different SSA types 
 
-### Aplication Example: Program Visualization
+### Application Example: Program Visualization
 
 One of the applications of Whiro is program visualization
 Tools able to provide graphic representation of the heap are useful for program understanding and debugging. Viewing data structures and other
