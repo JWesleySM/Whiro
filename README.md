@@ -57,7 +57,7 @@ $ git checkout llvmorg-10.0.0
 ### Building Whiro
 Clone this repository and build the Memory Monitor as an LLVM pass. Define a couple of path variables:
 ```
-$ LLVM_INSTALL_DIR=</path/to/llvm/>
+$ LLVM_INSTALL_DIR=</path/to/llvm/build/dir>
 $ LLVM_BIN=$LLVM_INSTALL_DIR/bin
 ```
 For example, if you built LLVM from source using the commands above, the paths will be like:
@@ -71,7 +71,7 @@ $ git clone git clone https://github.com/JWesleySM/Whiro
 $ cd Whiro
 $ mkdir build
 $ cd build
-$ cmake -DLLVM_INSTALL_DIR=$LLVM_INSTALL_DIR ../
+$ cmake -DLLVM_INSTALL_DIR=$LLVM_INSTALL_DIR ..
 ```
 Next, build the project:
 ```

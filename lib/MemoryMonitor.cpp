@@ -599,6 +599,9 @@ void MemoryMonitor::InsertHeapEntry(Value* HeapPtr, Type* AllocatedType, Value* 
     AllocatedType = dyn_cast<PointerType>(AllocatedType)->getElementType();
 
   int TypeIndex = GetTypeIndex(AllocatedType);
+  //If for some reason we could not determine the type index of this variable, we are not able to inspect it
+  if(TypeIndex == 50000)
+      return;
   
   //If this pointer is not void*, we need to cast it
   HeapPtr = (HeapPtr->getType() != Builder.getInt8PtrTy()) ? CastPointerToVoid(HeapPtr, Builder) : HeapPtr;
@@ -651,7 +654,7 @@ void MemoryMonitor::HandleHeapOperation(CallInst* HeapOp, IRBuilder<> Builder){
   Builder.SetInsertPoint(HeapOp->getNextNode());
   
   //If this is a deallocation, we'll set the corresponding address as unreachable in the table
-  if(HeapOp->getName() == "free"){
+  if(HeapOp->getCalledFunction()->getName() == "free"){
     DeleteHeapEntry(HeapOp->getOperand(0), Builder);
     HeapOperations++;
     return;
