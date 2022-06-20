@@ -13,10 +13,14 @@ customization [options](https://github.com/JWesleySM/NewWhiro#customizations) di
 * **-pr**:  enable precise instrumentation mode (track the contents pointed by pointer variables)
 * **-h**:   displays usage
 
-**Important**: In order to use this script, set the path to your LLVM installation at line 5.
+**Important**: In order to use this script, set the path to your LLVM installation at line 5. Alternatively, you can set up a global variable **LLVM** using **export** or set that variable locally when calling the script:
+
+```
+$ LLVM=/path/to/llvm/build/bin ./runWhiro.sh
+```
 
 Example of usage:
 ```
 # Inspect the contents pointerd by pointer variables in the main function showing debug information during instrumentation
-./runWhiro.sh -dmm -p -stc
+$ ./runWhiro.sh -dmm -p -stc
 ```

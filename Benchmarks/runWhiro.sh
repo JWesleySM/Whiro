@@ -2,7 +2,7 @@
 
 set -e
 WHIRODIR=../
-LLVM=/home/jw/llvm-project/build/bin
+#LLVM=<path/to/llvm/build/dir
 
 debugMM=""
 debugTT=""
