@@ -34,8 +34,10 @@ void WhiroUpdateHeapEntrySize(void *Block, int NewSize){
   HeapEntry * Entry;
   HASH_FIND(hh, HeapTable, &Block, sizeof(void*), Entry);
   if (Entry){
-    Entry->Data->Size = NewSize;
-    Entry->Data->ArrayStep = NewSize;
+    if (Entry->Data){
+      Entry->Data->Size = NewSize;
+      Entry->Data->ArrayStep = NewSize;
+    }
   }
 }
 

@@ -1290,6 +1290,8 @@ Value* MemoryMonitor::GetValidDef(std::vector<DbgVariableIntrinsic*>Trace, Basic
     }
   }
   
+  delete DT;
+  
   //If no definition can be safely used to report the variable, the memory monitor tries to extend the live
   //range of said variable with phi instructions. If this does not work as well, the monitor will shadow
   //the variable in the stack of the function being instrumented

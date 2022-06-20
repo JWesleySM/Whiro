@@ -128,7 +128,7 @@ typedef unsigned char uint8_t;
 /* malloc failures result in lost memory, hash tables are unusable */
 
 #ifndef uthash_fatal
-#define uthash_fatal(msg) exit(-1)        /* fatal OOM error */
+#define uthash_fatal(msg) printf("Heap Table Out of Memory\n"); exit(-1)        /* fatal OOM error */
 #endif
 
 #define HASH_RECORD_OOM(oomed) uthash_fatal("out of memory")
