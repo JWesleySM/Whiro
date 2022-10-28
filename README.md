@@ -30,7 +30,7 @@ At compilation time, the instrumentation pass builds the static components of th
 
 # Full Documentation
 
-If you want to know more about the details of our framework, such as implementation aspects, features and properties, Whiro is fully documented in this dissertation: [Automatic Inspection of Program State in an Uncooperative Environment](https://homepages.dcc.ufmg.br/~fernando/publications/books/wesley_msc.pdf). 
+If you want to know more about the details of our framework, such as implementation aspects, features and properties, Whiro is fully documented in the paper *Automatic Inspection of Program State in an Uncooperative Environment*. You can read the [author's version](https://homepages.dcc.ufmg.br/~fernando/publications/papers/MagalhaesSPE22.pdf) or the [published version](https://onlinelibrary.wiley.com/doi/10.1002/spe.3146) at Wiley.
 
 # Building and Usage
 Currently, the only software necessary to run Whiro is LLVM. If you want to use Whiro script, Bash will be also a requirement.
@@ -167,4 +167,23 @@ We track the contents of pointers at every function in the program and consideri
 **Results:** The figure above shows heap snapshots produced with our adaptation of Whiro. We have the two disjoint graphs in the heap of a program that copies a binary tree into
 a hash table. Collisions are stored in a linked list. Currently, we can visualize the heap of all the programs in the MiBench collection, for instance. Graphs are produced in DOT format. Users can render them using different graph visualization algorithms.
 
+# How to Cite
 
+If you use Whiro, please cite the reference paper:
+
+```bibtex
+@article{https://doi.org/10.1002/spe.3146,
+author = {Magalhães, José Wesley de Souza and Liao, Chunhua and Pereira, Fernando Magno Quintão},
+title = {Automatic inspection of program state in an uncooperative environment},
+journal = {Software: Practice and Experience},
+volume = {n/a},
+number = {n/a},
+pages = {},
+keywords = {debugging, inspection point, program state},
+doi = {https://doi.org/10.1002/spe.3146},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/spe.3146},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/spe.3146},
+abstract = {Abstract The program state is formed by the values that the program manipulates. These values are stored in the stack, in the heap, or in static memory. The ability to inspect the program state is useful as a debugging or as a verification aid. Yet, there exists no general technique to insert inspection points in type-unsafe languages such as C or C++. The difficulty comes from the need to traverse the memory graph in a so-called uncooperative environment. In this article, we propose an automatic technique to deal with this problem. We introduce a static code transformation approach that inserts in a program the instrumentation necessary to report its internal state. Our technique has been implemented in LLVM. It is possible to adjust the granularity of inspection points trading precision for performance. In this article, we demonstrate how to use inspection points to debug compiler optimizations; to augment benchmarks with verification code; and to visualize data structures.}
+}
+
+```
