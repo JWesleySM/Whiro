@@ -176,14 +176,15 @@ If you use Whiro, please cite the reference paper:
 author = {Magalhães, José Wesley de Souza and Liao, Chunhua and Pereira, Fernando Magno Quintão},
 title = {Automatic inspection of program state in an uncooperative environment},
 journal = {Software: Practice and Experience},
-volume = {n/a},
-number = {n/a},
-pages = {},
+volume = {52},
+number = {12},
+pages = {2727-2758},
 keywords = {debugging, inspection point, program state},
 doi = {https://doi.org/10.1002/spe.3146},
 url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/spe.3146},
 eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/spe.3146},
-abstract = {Abstract The program state is formed by the values that the program manipulates. These values are stored in the stack, in the heap, or in static memory. The ability to inspect the program state is useful as a debugging or as a verification aid. Yet, there exists no general technique to insert inspection points in type-unsafe languages such as C or C++. The difficulty comes from the need to traverse the memory graph in a so-called uncooperative environment. In this article, we propose an automatic technique to deal with this problem. We introduce a static code transformation approach that inserts in a program the instrumentation necessary to report its internal state. Our technique has been implemented in LLVM. It is possible to adjust the granularity of inspection points trading precision for performance. In this article, we demonstrate how to use inspection points to debug compiler optimizations; to augment benchmarks with verification code; and to visualize data structures.}
+abstract = {Abstract The program state is formed by the values that the program manipulates. These values are stored in the stack, in the heap, or in static memory. The ability to inspect the program state is useful as a debugging or as a verification aid. Yet, there exists no general technique to insert inspection points in type-unsafe languages such as C or C++. The difficulty comes from the need to traverse the memory graph in a so-called uncooperative environment. In this article, we propose an automatic technique to deal with this problem. We introduce a static code transformation approach that inserts in a program the instrumentation necessary to report its internal state. Our technique has been implemented in LLVM. It is possible to adjust the granularity of inspection points trading precision for performance. In this article, we demonstrate how to use inspection points to debug compiler optimizations; to augment benchmarks with verification code; and to visualize data structures.},
+year = {2022}
 }
 
 ```
