@@ -30,16 +30,6 @@ void WhiroOpenTypeTable(const char* ProgramName, int TableSize, int InsHeapArg, 
    }
   }	 
  
-  /*printf("Type Tablesss\n");
-  for(int i = 0; i < TableSize; i++){
-    printf("%d. %s QuantFields: %d\n", i, TypeTable[i].Name, TypeTable[i].QuantFields);
-    for(int j = 0; j < TypeTable[i].QuantFields; j++){
-      printf("Field: %s Format: %d Offset: %d BaseType %d\n", TypeTable[i].Fields[j].Name, TypeTable[i].Fields[j].Format, TypeTable[i].Fields[j].Offset, TypeTable[i].Fields[j].BaseTypeIndex);
-    }
-  }
-  printf("\n\n");
-  fclose(TypeTableFile);
-  //exit(1);*/
 }
 
 int WhiroIsScalarType(int Format){
